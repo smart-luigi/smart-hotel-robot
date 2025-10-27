@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="smart_hotel_server.cc" />
+    <ClCompile Include="smart_hotel_app.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="smart_hotel_server.h" />
+    <ClInclude Include="..\..\inc\message.h" />
+  </ItemGroup>
+</Project>

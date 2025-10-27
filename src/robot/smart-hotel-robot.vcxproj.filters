@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="resource">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="meituan">
+      <UniqueIdentifier>{fac1e24d-9cdb-4a66-9d17-6a544662fcb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ctrip">
+      <UniqueIdentifier>{6e82af72-679c-4be2-9935-4594ae9e4720}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="precomp.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="resource.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_hotel_robot_resource_handler.h" />
+    <ClInclude Include="smart_hotel_robot_context.h" />
+    <ClInclude Include="..\..\inc\message.h" />
+    <ClInclude Include="smart_hotel_robot.h" />
+    <ClInclude Include="meituan\smart_hotel_robot_filter_meituan.h">
+      <Filter>meituan</Filter>
+    </ClInclude>
+    <ClInclude Include="meituan\smart_hotel_robot_meituan.h">
+      <Filter>meituan</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrip\smart_hotel_robot_ctrip.h">
+      <Filter>ctrip</Filter>
+    </ClInclude>
+    <ClInclude Include="ctrip\smart_hotel_robot_filter_ctrip.h">
+      <Filter>ctrip</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_hotel_robot_window_handler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="smart-hotel-robot.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icon_normal.ico">
+      <Filter>resource</Filter>
+    </Image>
+    <Image Include="res\icon_small.ico">
+      <Filter>resource</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="smart_hotel_robot_context.cc" />
+    <ClCompile Include="smart_hotel_robot_resource_handler.cc" />
+    <ClCompile Include="smart_hotel_robot_app.cc" />
+    <ClCompile Include="meituan\smart_hotel_robot_filter_meituan.cc">
+      <Filter>meituan</Filter>
+    </ClCompile>
+    <ClCompile Include="meituan\smart_hotel_robot_meituan.cc">
+      <Filter>meituan</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrip\smart_hotel_robot_ctrip.cc">
+      <Filter>ctrip</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrip\smart_hotel_robot_filter_ctrip.cc">
+      <Filter>ctrip</Filter>
+    </ClCompile>
+    <ClCompile Include="smart_hotel_robot_window_handler.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="smart-hotel-robot.exe.manifest">
+      <Filter>resource</Filter>
+    </Manifest>
+  </ItemGroup>
+</Project>
