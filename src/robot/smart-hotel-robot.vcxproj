@@ -203,7 +203,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\message.h" />
+    <ClInclude Include="..\..\inc\smart_hotel_message.h" />
     <ClInclude Include="ctrip\smart_hotel_robot_filter_ctrip.h" />
     <ClInclude Include="ctrip\smart_hotel_robot_ctrip.h" />
     <ClInclude Include="smart_hotel_robot_window_handler.h" />

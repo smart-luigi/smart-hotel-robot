@@ -69,6 +69,8 @@ int SmartHotelRobotContext::Init(int argc, wchar_t* argv[])
 		_topic_robot_name.append(MESSAGE_TOPIC_ROBOT);
 		_topic_robot_name.append("-");
 		_topic_robot_name.append(_cache_env_id.c_str());
+		_topic_robot_name.append("-");
+		_topic_robot_name.append(std::to_string(_cache_env_type));
 		if (!CreateIpcQueue(_topic_robot_name.c_str(), this, IpcMessageCallback))
 		{
 			result = ERROR_CALLBACK_SUPPLIED_INVALID_DATA;
@@ -174,23 +176,30 @@ int SmartHotelRobotContext::SendServerMessage(LPCVOID message_buffer, DWORD mess
 	return ERROR_SUCCESS;
 }
 
-int SmartHotelRobotContext::PostMessageRobotStarted()
+int SmartHotelRobotContext::SendServerMessage(LPCVOID message_buffer, DWORD message_length, PVOID answer_buffer, DWORD answer_length, DWORD answer_timeout)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STARTED, _cache_env_id.c_str(), _cache_env_type);
-	if (!SendIpcMessage(MESSAGE_TOPIC_SERVER, (const char*)&message, sizeof(RobotMessageHeader)))
+	if (!SendIpcMessage(MESSAGE_TOPIC_SERVER, message_buffer, message_length, answer_buffer, answer_length, answer_timeout))
 		return ERROR_DATA_NOT_ACCEPTED;
 
 	return ERROR_SUCCESS;
 }
 
-int SmartHotelRobotContext::PostMessageRobotStopped()
+int SmartHotelRobotContext::SendServerMessageRobotStarted()
+{
+	RobotMessageHeader message;
+	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STARTED, _cache_env_id.c_str(), _cache_env_type);
+	return SendServerMessage(&message, sizeof(RobotMessageHeader));
+}
+
+int SmartHotelRobotContext::SendServerMessageRobotStopped()
 {
 	RobotMessageHeader message;
 	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STOPPED, _cache_env_id.c_str(), _cache_env_type);
-	if (!SendIpcMessage(MESSAGE_TOPIC_SERVER, (const char*)&message, sizeof(RobotMessageHeader)))
-		return ERROR_DATA_NOT_ACCEPTED;
+	return SendServerMessage(&message, sizeof(RobotMessageHeader));
+}
 
+int SmartHotelRobotContext::SendServerMessageRobotNeedSmsAuthorize(char* sms, DWORD sms_length)
+{
 	return ERROR_SUCCESS;
 }
 
@@ -341,15 +350,19 @@ int SmartHotelRobotContext::HandleMessage(LPCSTR ipc_name,
 	unsigned int message = header->message;
 	switch (message)
 	{
-	case MESSAGE_RANGE_BEGIN:
-		break;
 	case MESSAGE_ROBOT_STOP:
 		if (_application)
 		{
 			PostMessage(_application->GetRootWindowHandle(), WM_DESTROY, 0, 0);
 		}
 		break;
-	case MESSAGE_RANGE_END:
+	case MESSAGE_ROBOT_AUTHORIZE_START:
+		break;
+	case MESSAGE_ROBOT_AUTHORIZE_SMS:
+		break;
+	case MESSAGE_ROBOT_QUERY_STATUS:
+		break;
+	case MESSAGE_ROBOT_QUERY_HOTELS:
 		break;
 	default:
 		break;

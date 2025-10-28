@@ -19,10 +19,10 @@ LRESULT SmartHotelRobotWindowHandler::HandleWindowMessage(HWND hwnd, UINT messag
 	switch (message)
 	{
 	case WM_CREATE:
-		result = _context->PostMessageRobotStarted();
+		result = _context->SendServerMessageRobotStarted();
 		break;
 	case WM_DESTROY:
-		result = _context->PostMessageRobotStopped();
+		result = _context->SendServerMessageRobotStopped();
 		PostMessage(hwnd, WM_EXIT, 0, 0);
 		break;
 	case WM_EXIT:

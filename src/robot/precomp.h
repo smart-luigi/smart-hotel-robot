@@ -19,5 +19,5 @@
 #include <smart_adv.h>
 #include <smart_cef_client.h>
 #include "resource.h"
-#include "message.h"
 #include "service_ipc.h"
+#include "smart_hotel_message.h"

@@ -154,10 +154,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="smart_hotel_app.cc" />
+    <ClCompile Include="smart_hotel_robot.cc" />
     <ClCompile Include="smart_hotel_server.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\message.h" />
+    <ClInclude Include="..\..\inc\smart_hotel_message.h" />
+    <ClInclude Include="smart_hotel_robot.h" />
     <ClInclude Include="smart_hotel_server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -20,7 +20,7 @@
     </ClInclude>
     <ClInclude Include="smart_hotel_robot_resource_handler.h" />
     <ClInclude Include="smart_hotel_robot_context.h" />
-    <ClInclude Include="..\..\inc\message.h" />
+    <ClInclude Include="..\..\inc\smart_hotel_message.h" />
     <ClInclude Include="smart_hotel_robot.h" />
     <ClInclude Include="meituan\smart_hotel_robot_filter_meituan.h">
       <Filter>meituan</Filter>

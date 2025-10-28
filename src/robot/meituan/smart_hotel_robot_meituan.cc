@@ -6,6 +6,7 @@ SmartHotelRobotMeituan::SmartHotelRobotMeituan(SmartHotelRobotContext* context)
 	, _url_login("https://passport.meituan.com/useraccount/ilogin")
 	, _url_list("https://i.meituan.com/awp/h5/hotel/list/list.html")
 	, _url_data("https://i.meituan.com/awp/h5/hotel/list/list.html")
+	, _authorized(false)
 {
 
 }
@@ -47,6 +48,11 @@ const char* SmartHotelRobotMeituan::GetDataUrl()
 	return _url_data.c_str();
 }
 
+void SmartHotelRobotMeituan::SetAuthorized()
+{
+	_authorized = true;
+}
+
 bool SmartHotelRobotMeituan::IsLoginUrl(const char* url)
 {
 	return boost::istarts_with(url, _url_login);
@@ -62,9 +68,15 @@ bool SmartHotelRobotMeituan::IsDataUrl(const char* url)
 	return boost::istarts_with(url, _url_data);
 }
 
+bool SmartHotelRobotMeituan::IsAuthorized()
+{
+	return _authorized;
+}
+
 void SmartHotelRobotMeituan::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	std::thread([](CefRefPtr<CefFrame> frame, const CefString& url, const std::string& id) {
+	std::thread([](CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotContext* context) {
+		std::string id = context->GetCacheEnviromentId();
 		std::string code = R"(
 				var iloginUserConfirm = document.getElementById("iloginUserConfirm");
 				if(iloginUserConfirm) {
@@ -91,11 +103,14 @@ void SmartHotelRobotMeituan::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRe
 
 		boost::replace_all(code, "XXXXXXXXXXX", id);
 
-		Sleep(2000);
+		char sms[6] = { 0 };
+		context->SendServerMessageRobotNeedSmsAuthorize(sms, sizeof(sms));
 
-		frame->ExecuteJavaScript(code, url, 0);
+		//Sleep(2000);
 
-	}, frame, url, _context->GetCacheEnviromentId()).detach();
+		//frame->ExecuteJavaScript(code, url, 0);
+
+	}, frame, url, _context).detach();
 }
 
 void SmartHotelRobotMeituan::StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)

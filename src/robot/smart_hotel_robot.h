@@ -5,7 +5,7 @@
 #include <cef/internal/cef_ptr.h>
 #include <cef/cef_browser.h>
 #include <cef/cef_frame.h>
-#include "message.h"
+#include "smart_hotel_message.h"
 
 class SmartHotelRobot
 {
@@ -17,9 +17,11 @@ public:
 	virtual const char* GetLoginUrl() = 0;
 	virtual const char* GetListUrl() = 0;
 	virtual const char* GetDataUrl() = 0;
+	virtual void SetAuthorized() = 0;
 	virtual bool IsLoginUrl(const char* url) = 0;
 	virtual bool IsListUrl(const char* url) = 0;
 	virtual bool IsDataUrl(const char* url) = 0;
+	virtual bool IsAuthorized() = 0;
 public:
 	virtual void StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;

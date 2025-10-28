@@ -6,6 +6,7 @@ SmartHotelRobotCtrip::SmartHotelRobotCtrip(SmartHotelRobotContext* context)
 	, _url_login("https://passport.meituan.com")
 	, _url_list("https://i.meituan.com/awp/h5/hotel/list/list.html")
 	, _url_data("https://i.meituan.com/awp/h5/hotel/list/list.html")
+	, _authorized(false)
 {
 
 }
@@ -47,6 +48,11 @@ const char* SmartHotelRobotCtrip::GetDataUrl()
 	return _url_data.c_str();
 }
 
+void SmartHotelRobotCtrip::SetAuthorized()
+{
+	_authorized = true;
+}
+
 bool SmartHotelRobotCtrip::IsLoginUrl(const char* url)
 {
 	return boost::istarts_with(url, _url_login);
@@ -60,6 +66,11 @@ bool SmartHotelRobotCtrip::IsListUrl(const char* url)
 bool SmartHotelRobotCtrip::IsDataUrl(const char* url)
 {
 	return boost::istarts_with(url, _url_data);
+}
+
+bool SmartHotelRobotCtrip::IsAuthorized()
+{
+	return _authorized;
 }
 
 void SmartHotelRobotCtrip::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
