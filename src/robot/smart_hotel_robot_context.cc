@@ -198,7 +198,7 @@ int SmartHotelRobotContext::SendServerMessageRobotStopped()
 	return SendServerMessage(&message, sizeof(RobotMessageHeader));
 }
 
-int SmartHotelRobotContext::SendServerMessageRobotNeedSmsAuthorize(char* sms, DWORD sms_length)
+int SmartHotelRobotContext::SendServerMessageRobotAuthorizeCompleted(char* sms, DWORD sms_length)
 {
 	return ERROR_SUCCESS;
 }
@@ -356,13 +356,17 @@ int SmartHotelRobotContext::HandleMessage(LPCSTR ipc_name,
 			PostMessage(_application->GetRootWindowHandle(), WM_DESTROY, 0, 0);
 		}
 		break;
-	case MESSAGE_ROBOT_AUTHORIZE_START:
+	case MESSAGE_ROBOT_AUTHORIZING:
+		_hotel_robot->StartAuthorizing(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	case MESSAGE_ROBOT_AUTHORIZE_SMS:
+		_hotel_robot->StartAuthorizeSms(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	case MESSAGE_ROBOT_QUERY_STATUS:
+		_hotel_robot->QueryStatus(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	case MESSAGE_ROBOT_QUERY_HOTELS:
+		_hotel_robot->QueryHotels(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	default:
 		break;

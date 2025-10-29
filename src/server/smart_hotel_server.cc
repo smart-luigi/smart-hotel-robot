@@ -291,12 +291,9 @@ int SmartHotelServer::HandleMessage(LPCSTR ipc_name,
 		break;
 	case MESSAGE_ROBOT_STOPPED:
 		result = HandleMessageRobotStopped(ipc_name, message_buffer, message_length, answer_buffer, answer_length);
-	case MESSAGE_ROBOT_AUTHORIZE_COMPLETED:
-		result = HandleMessageRobotAuthorize(ipc_name, message_buffer, message_length, answer_buffer, answer_length);
+	case MESSAGE_ROBOT_AUTHORIZED:
+		result = HandleMessageRobotAuthorized(ipc_name, message_buffer, message_length, answer_buffer, answer_length);
 		break;
-	//case MESSAGE_ROBOT_HOTEL_LIST_READY:
-	//	result = HandleMessageRobotHotelListReady(ipc_name, message_buffer, message_length, answer_buffer, answer_length);
-	//	break;
 	default:
 		break;
 	}
@@ -340,7 +337,7 @@ int SmartHotelServer::HandleMessageRobotStopped(LPCSTR ipc_name,
 	return result;
 }
 
-int SmartHotelServer::HandleMessageRobotAuthorize(LPCSTR ipc_name,
+int SmartHotelServer::HandleMessageRobotAuthorized(LPCSTR ipc_name,
 	LPCVOID message_buffer,
 	DWORD   message_length,
 	LPVOID  answer_buffer,
@@ -356,18 +353,6 @@ int SmartHotelServer::HandleMessageRobotAuthorize(LPCSTR ipc_name,
 			SmartLogInfo("Hotel Robot [%s-%d] ", message->id, message->type);
 		}
 	} while (false);
-
-	return result;
-}
-
-int SmartHotelServer::HandleMessageRobotHotelListReady(LPCSTR ipc_name,
-	LPCVOID message_buffer,
-	DWORD   message_length,
-	LPVOID  answer_buffer,
-	DWORD   answer_length)
-{
-	int result = ERROR_SUCCESS;
-
 
 	return result;
 }
@@ -480,7 +465,7 @@ void SmartHotelServer::OnHttpHandleQueryRobotHotels(const httplib::Request& req,
 	}
 }
 
-void SmartHotelServer::OnHttpHandleAuthorizeRobotStart(const httplib::Request& req, httplib::Response& res)
+void SmartHotelServer::OnHttpHandleAuthorizingRobot(const httplib::Request& req, httplib::Response& res)
 {
 	std::string phone;
 	unsigned int type = TYPE_ROBOT_UNKNOWN;
@@ -491,7 +476,7 @@ void SmartHotelServer::OnHttpHandleAuthorizeRobotStart(const httplib::Request& r
 	if (message == nullptr)
 		return;
 
-	int result = AuthorizeRobotStart(phone.c_str(), type, message, MESSAGE_SIZE);
+	int result = AuthorizingRobot(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
 		std::string response;
@@ -654,10 +639,10 @@ int SmartHotelServer::QueryRobotHotels(const char* id, unsigned int type, char* 
 	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
 }
 
-int SmartHotelServer::AuthorizeRobotStart(const char* id, unsigned int type, char* response, unsigned int response_length)
+int SmartHotelServer::AuthorizingRobot(const char* id, unsigned int type, char* response, unsigned int response_length)
 {
 	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_AUTHORIZE_START, id, type);
+	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_AUTHORIZING, id, type);
 	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
 }
 

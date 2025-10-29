@@ -35,32 +35,27 @@ protected:
 		LPVOID  answer_buffer,
 		DWORD   answer_length);
 protected:
-	int HandleMessageRobotStarted(LPCSTR ipc_name,
+	virtual int HandleMessageRobotStarted(LPCSTR ipc_name,
 		LPCVOID message_buffer,
 		DWORD   message_length,
 		LPVOID  answer_buffer,
 		DWORD   answer_length);
-	int HandleMessageRobotStopped(LPCSTR ipc_name,
+	virtual int HandleMessageRobotStopped(LPCSTR ipc_name,
 		LPCVOID message_buffer,
 		DWORD   message_length,
 		LPVOID  answer_buffer,
 		DWORD   answer_length);
-	int HandleMessageRobotAuthorize(LPCSTR ipc_name,
+	virtual int HandleMessageRobotAuthorized(LPCSTR ipc_name,
 		LPCVOID message_buffer,
 		DWORD   message_length,
 		LPVOID  answer_buffer,
 		DWORD   answer_length);
-	int HandleMessageRobotHotelListReady(LPCSTR ipc_name,
-		LPCVOID message_buffer,
-		DWORD   message_length,
-		LPVOID  answer_buffer,
-		DWORD   answer_length);
-public:
+protected:
 	void OnHttpHandleStartRobot(const httplib::Request& req, httplib::Response& res);
 	void OnHttpHandleStopRobot(const httplib::Request& req, httplib::Response& res);
 	void OnHttpHandleQueryRobotStatus(const httplib::Request& req, httplib::Response& res);
 	void OnHttpHandleQueryRobotHotels(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleAuthorizeRobotStart(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleAuthorizingRobot(const httplib::Request& req, httplib::Response& res);
 	void OnHttpHandleAuthorizeRobotSms(const httplib::Request& req, httplib::Response& res);
 	bool OnHttpHandleValidateParameters(const httplib::Request& req, httplib::Response& res, std::string& phone, unsigned int* type);
 	void OnHttpHandleError(const httplib::Request& req, httplib::Response& res);
@@ -69,7 +64,7 @@ protected:
 	int StopRobot(const char* id, unsigned int type);
 	int QueryRobotStatus(const char* id, unsigned int type, char* response, unsigned int response_length);
 	int QueryRobotHotels(const char* id, unsigned int type, char* response, unsigned int response_length);
-	int AuthorizeRobotStart(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int AuthorizingRobot(const char* id, unsigned int type, char* response, unsigned int response_length);
 	int AuthorizeRobotSms(const char* id, unsigned int type, char* response, unsigned int response_length);
 protected:
 	int SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length);

@@ -28,6 +28,10 @@ protected:
 	virtual bool IsDataUrl(const char* url) override;
 	virtual bool IsAuthorized() override;
 protected:
+	virtual void StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
 	virtual void StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 	virtual void StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 protected:

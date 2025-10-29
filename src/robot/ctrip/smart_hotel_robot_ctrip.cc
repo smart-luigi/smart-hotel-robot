@@ -73,6 +73,26 @@ bool SmartHotelRobotCtrip::IsAuthorized()
 	return _authorized;
 }
 
+void SmartHotelRobotCtrip::StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotCtrip::StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotCtrip::QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotCtrip::QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
 void SmartHotelRobotCtrip::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 

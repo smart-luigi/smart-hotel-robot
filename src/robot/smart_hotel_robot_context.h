@@ -37,12 +37,11 @@ public:
 	int SendServerMessage(LPCVOID message_buffer, DWORD message_length, PVOID answer_buffer, DWORD answer_length, DWORD answer_timeout);
 	int SendServerMessageRobotStarted();
 	int SendServerMessageRobotStopped();
-	int SendServerMessageRobotNeedSmsAuthorize(char* sms, DWORD sms_length);
+	int SendServerMessageRobotAuthorizeCompleted(char* sms, DWORD sms_length);
 protected:
 	int InitCacheEnviroment(int argc, wchar_t** argv, const wchar_t* cache_env_id, const wchar_t* cache_env_type);
 	int InitHotelRobot();
 protected:
-	int HandleServer
 protected:
 	virtual int HandleMessage(LPCSTR ipc_name,
 		LPCVOID message_buffer,

@@ -23,6 +23,10 @@ public:
 	virtual bool IsDataUrl(const char* url) = 0;
 	virtual bool IsAuthorized() = 0;
 public:
+	virtual void StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
+	virtual void StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
+	virtual void QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
+	virtual void QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 };

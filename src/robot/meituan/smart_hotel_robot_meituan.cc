@@ -73,6 +73,26 @@ bool SmartHotelRobotMeituan::IsAuthorized()
 	return _authorized;
 }
 
+void SmartHotelRobotMeituan::StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotMeituan::StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotMeituan::QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotMeituan::QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
 void SmartHotelRobotMeituan::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 	std::thread([](CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotContext* context) {
@@ -104,7 +124,7 @@ void SmartHotelRobotMeituan::StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRe
 		boost::replace_all(code, "XXXXXXXXXXX", id);
 
 		char sms[6] = { 0 };
-		context->SendServerMessageRobotNeedSmsAuthorize(sms, sizeof(sms));
+		context->SendServerMessageRobotAuthorizeCompleted(sms, sizeof(sms));
 
 		//Sleep(2000);
 
