@@ -186,16 +186,16 @@ int SmartHotelRobotContext::SendServerMessage(LPCVOID message_buffer, DWORD mess
 
 int SmartHotelRobotContext::SendServerMessageRobotStarted()
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STARTED, _cache_env_id.c_str(), _cache_env_type);
-	return SendServerMessage(&message, sizeof(RobotMessageHeader));
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_STARTED, _cache_env_id.c_str(), _cache_env_type);
+	return SendServerMessage(&message, sizeof(MessageRobotHeader));
 }
 
 int SmartHotelRobotContext::SendServerMessageRobotStopped()
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STOPPED, _cache_env_id.c_str(), _cache_env_type);
-	return SendServerMessage(&message, sizeof(RobotMessageHeader));
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_STOPPED, _cache_env_id.c_str(), _cache_env_type);
+	return SendServerMessage(&message, sizeof(MessageRobotHeader));
 }
 
 int SmartHotelRobotContext::SendServerMessageRobotAuthorizeCompleted(char* sms, DWORD sms_length)
@@ -343,7 +343,7 @@ int SmartHotelRobotContext::HandleMessage(LPCSTR ipc_name,
 {
 	int result = ERROR_SUCCESS;
 
-	RobotMessageHeader* header = (RobotMessageHeader*)message_buffer;
+	MessageRobotHeader* header = (MessageRobotHeader*)message_buffer;
 	if (header == nullptr)
 		return ERROR_DATA_LOST_REPAIR;
 

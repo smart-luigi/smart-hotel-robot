@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="resource">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="resource.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="default_cef_response_filter.h" />
+    <ClInclude Include="default_cef_resource_request_handler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="test_cef_client.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico">
+      <Filter>resource</Filter>
+    </Image>
+    <Image Include="icon_small.ico">
+      <Filter>resource</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test_cef_client.cc" />
+    <ClCompile Include="default_cef_response_filter.cc" />
+    <ClCompile Include="default_cef_resource_request_handler.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="test_cef_client.exe.manifest">
+      <Filter>resource</Filter>
+    </Manifest>
+  </ItemGroup>
+</Project>

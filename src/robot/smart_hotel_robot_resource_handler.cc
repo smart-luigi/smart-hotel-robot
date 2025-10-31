@@ -63,13 +63,27 @@ void SmartHotelRobotResourceHandler::OnResourceLoadComplete(CefRefPtr<CefBrowser
 		CefString* url = new CefString(request->GetURL());
 		if (_robot->IsLoginUrl(url->ToString().c_str()))
 		{
-			_robot->StartAutoLogin(browser, frame, *url);
+			_robot->SetUnauthorized();
+
+			_robot->WaitAuthorizingStart();
+
+			_robot->DoAuthorizing(browser, frame, *url);
+
+			_robot->WaitAuthorizingComplete();
+
+			_robot->WaitAuthorizSmsStart();
+
+			_robot->DoAuthorizSms(browser, frame, *url);
+
+			_robot->WaitAuthorizSmsComplete();
+
 			break;
 		}
 
 		if (_robot->IsListUrl(url->ToString().c_str()))
 		{
-			_robot->StartScrollList(browser, frame, *url);
+			_robot->SetAuthorized();
+			//_robot->StartScrollList(browser, frame, *url);
 			break;
 		}
 

@@ -230,14 +230,14 @@ int SmartHotelServer::InitHttpServer()
 		_http_server->Get("/smart-hotel/api/authorize-robot-start",
 			[=](const httplib::Request& req, httplib::Response& res)
 			{
-				this->OnHttpHandleQueryRobotStatus(req, res);
+				this->OnHttpHandleAuthorizingRobot(req, res);
 			}
 		);
 
 		_http_server->Get("/smart-hotel/api/authorize-robot-sms",
 			[=](const httplib::Request& req, httplib::Response& res)
 			{
-				this->OnHttpHandleQueryRobotStatus(req, res);
+				this->OnHttpHandleAuthorizeRobotSms(req, res);
 			}
 		);
 
@@ -279,7 +279,7 @@ int SmartHotelServer::HandleMessage(LPCSTR ipc_name,
 {
 	int result = ERROR_SUCCESS;
 
-	RobotMessageHeader* header = (RobotMessageHeader*)message_buffer;
+	MessageRobotHeader* header = (MessageRobotHeader*)message_buffer;
 	if (header == nullptr)
 		return ERROR_DATA_LOST_REPAIR;
 
@@ -309,7 +309,7 @@ int SmartHotelServer::HandleMessageRobotStarted(LPCSTR ipc_name,
 {
 	int result = ERROR_SUCCESS;
 
-	RobotMessageHeader* message = (RobotMessageHeader*)message_buffer;
+	MessageRobotHeader* message = (MessageRobotHeader*)message_buffer;
 	if (message)
 	{
 		SmartLogInfo("Hotel Robot [%s-%d] Started", message->id, message->type);
@@ -327,7 +327,7 @@ int SmartHotelServer::HandleMessageRobotStopped(LPCSTR ipc_name,
 {
 	int result = ERROR_SUCCESS;
 
-	RobotMessageHeader* message = (RobotMessageHeader*)message_buffer;
+	MessageRobotHeader* message = (MessageRobotHeader*)message_buffer;
 	if (message)
 	{
 		SmartLogInfo("Hotel Robot [%s-%d] Stopped", message->id, message->type);
@@ -347,7 +347,7 @@ int SmartHotelServer::HandleMessageRobotAuthorized(LPCSTR ipc_name,
 
 	do
 	{
-		RobotMessageHeader* message = (RobotMessageHeader*)message_buffer;
+		MessageRobotHeader* message = (MessageRobotHeader*)message_buffer;
 		if (message)
 		{
 			SmartLogInfo("Hotel Robot [%s-%d] ", message->id, message->type);
@@ -359,24 +359,25 @@ int SmartHotelServer::HandleMessageRobotAuthorized(LPCSTR ipc_name,
 
 void SmartHotelServer::OnHttpHandleStartRobot(const httplib::Request& req, httplib::Response& res)
 {
-	std::string phone;
-	unsigned int type = TYPE_ROBOT_UNKNOWN;
-	if (!OnHttpHandleValidateParameters(req, res, phone, &type))
-		return;
+	std::string response;
 
-	int result = StartRobot(phone.c_str(), type);
-	if (result == ERROR_SUCCESS)
+	do
 	{
-		std::string response;
-		CreateSuccessResponse(response);
-		res.set_content(response.c_str(), "application/json");
-	}
-	else
-	{
-		std::string response;
-		CreateErrorResponse(13, "start robot failed", response);
-		res.set_content(response.c_str(), "application/json");
-	}
+		std::string phone;
+		unsigned int type = TYPE_ROBOT_UNKNOWN;
+		if (!OnHttpHandleValidateParameters(req, res, phone, &type))
+			break;
+
+		int result = StartRobot(phone.c_str(), type);
+		if (result == ERROR_SUCCESS)
+		{
+			CreateSuccessResponse(res);
+		}
+		else
+		{
+			CreateErrorResponse(13, "start robot failed", res);
+		}
+	} while (false);
 }
 
 void SmartHotelServer::OnHttpHandleStopRobot(const httplib::Request& req, httplib::Response& res)
@@ -389,15 +390,11 @@ void SmartHotelServer::OnHttpHandleStopRobot(const httplib::Request& req, httpli
 	int result = StopRobot(phone.c_str(), type);
 	if (result == ERROR_SUCCESS)
 	{
-		std::string response;
-		CreateSuccessResponse(response);
-		res.set_content(response.c_str(), "application/json");
+		CreateSuccessResponse(res);
 	}
 	else
 	{
-		std::string response;
-		CreateErrorResponse(13, "stop robot failed", response);
-		res.set_content(response.c_str(), "application/json");
+		CreateErrorResponse(13, "stop robot failed", res);
 	}
 }
 
@@ -415,15 +412,19 @@ void SmartHotelServer::OnHttpHandleQueryRobotStatus(const httplib::Request& req,
 	int result = QueryRobotStatus(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		std::string response;
-		CreateSuccessResponse(message, response);
-		res.set_content(response.c_str(), "application/json");
+		MessageRobotStatusPtr status_message = (MessageRobotStatusPtr)message;
+		if (status_message == nullptr)
+		{
+			CreateErrorResponse(13, "query robot status failed", res);
+		}
+		else
+		{
+			CreateSuccessResponse(std::to_string(status_message->authorized).c_str(), res);
+		}
 	}
 	else
 	{
-		std::string response;
-		CreateErrorResponse(13, "query robot status failed", response);
-		res.set_content(response.c_str(), "application/json");
+		CreateErrorResponse(13, "query robot status failed", res);
 	}
 
 	if (message)
@@ -447,15 +448,11 @@ void SmartHotelServer::OnHttpHandleQueryRobotHotels(const httplib::Request& req,
 	int result = QueryRobotHotels(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		std::string response;
-		CreateSuccessResponse(message, response);
-		res.set_content(response.c_str(), "application/json");
+		CreateSuccessResponse(message, res);
 	}
 	else
 	{
-		std::string response;
-		CreateErrorResponse(13, "query robot hotels failed", response);
-		res.set_content(response.c_str(), "application/json");
+		CreateErrorResponse(13, "query robot hotels failed", res);
 	}
 
 	if (message)
@@ -479,15 +476,11 @@ void SmartHotelServer::OnHttpHandleAuthorizingRobot(const httplib::Request& req,
 	int result = AuthorizingRobot(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		std::string response;
-		CreateSuccessResponse(message, response);
-		res.set_content(response.c_str(), "application/json");
+		CreateSuccessResponse(message, res);
 	}
 	else
 	{
-		std::string response;
-		CreateErrorResponse(13, "authorize robot start failed", response);
-		res.set_content(response.c_str(), "application/json");
+		CreateErrorResponse(13, "authorize robot start failed", res);
 	}
 
 	if (message)
@@ -504,22 +497,33 @@ void SmartHotelServer::OnHttpHandleAuthorizeRobotSms(const httplib::Request& req
 	if (!OnHttpHandleValidateParameters(req, res, phone, &type))
 		return;
 
+	if (!req.has_param("sms"))
+	{
+		std::string output = R"({"code": 11, "message" : "parameter sms not found"})";
+		res.set_content(output.c_str(), "application/json");
+		return;
+	}
+
+	std::string sms = req.get_param_value("sms");
+	if (sms.empty())
+	{
+		std::string output = R"({"code": 12, "message" : "invalid sms parameter"})";
+		res.set_content(output.c_str(), "application/json");
+		return;
+	}
+
 	char* message = (char*)SmartMemAlloc(MESSAGE_SIZE);
 	if (message == nullptr)
 		return;
 
-	int result = AuthorizeRobotSms(phone.c_str(), type, message, MESSAGE_SIZE);
+	int result = AuthorizeRobotSms(phone.c_str(), sms.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		std::string response;
-		CreateSuccessResponse(message, response);
-		res.set_content(response.c_str(), "application/json");
+		CreateSuccessResponse(message, res);
 	}
 	else
 	{
-		std::string response;
-		CreateErrorResponse(13, "authorize robot sms failed", response);
-		res.set_content(response.c_str(), "application/json");
+		CreateErrorResponse(13, "authorize robot sms failed", res);
 	}
 
 	if (message)
@@ -620,37 +624,38 @@ int SmartHotelServer::StartRobot(const char* id, unsigned int type)
 
 int SmartHotelServer::StopRobot(const char* id, unsigned int type)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_STOP, id, type);
-	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader));
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_STOP, id, type);
+	return SendRobotMessage(id, type, &message, sizeof(MessageRobotHeader));
 }
 
 int SmartHotelServer::QueryRobotStatus(const char* id, unsigned int type, char* response, unsigned int response_length)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_QUERY_STATUS, id, type);
-	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_QUERY_STATUS, id, type);
+	return SendRobotMessage(id, type, &message, sizeof(MessageRobotHeader), response, response_length);
 }
 
 int SmartHotelServer::QueryRobotHotels(const char* id, unsigned int type, char* response, unsigned int response_length)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_QUERY_HOTELS, id, type);
-	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_QUERY_HOTELS, id, type);
+	return SendRobotMessage(id, type, &message, sizeof(MessageRobotHeader), response, response_length);
 }
 
 int SmartHotelServer::AuthorizingRobot(const char* id, unsigned int type, char* response, unsigned int response_length)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_AUTHORIZING, id, type);
-	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
+	MessageRobotHeader message;
+	CreateMessageRobotHeader(&message, MESSAGE_ROBOT_AUTHORIZING, id, type);
+	return SendRobotMessage(id, type, &message, sizeof(MessageRobotHeader), response, response_length);
 }
 
-int SmartHotelServer::AuthorizeRobotSms(const char* id, unsigned int type, char* response, unsigned int response_length)
+int SmartHotelServer::AuthorizeRobotSms(const char* id, const char* code, unsigned int type, char* response, unsigned int response_length)
 {
-	RobotMessageHeader message;
-	CreateRobotMessageHeader(&message, MESSAGE_ROBOT_AUTHORIZE_SMS, id, type);
-	return SendRobotMessage(id, type, &message, sizeof(RobotMessageHeader), response, response_length);
+	MessageRobotAuthorizeSms message;
+	CreateMessageRobotHeader(&message.header, MESSAGE_ROBOT_AUTHORIZE_SMS, id, type);
+	std::memcpy((char*)message.sms, code, lstrlenA(code));
+	return SendRobotMessage(id, type, &message, sizeof(MessageRobotHeader), response, response_length);
 }
 
 int SmartHotelServer::SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length)
@@ -697,9 +702,9 @@ void SmartHotelServer::GetRobotMessageTopic(const char* id, std::string& topic)
 	topic.append(id);
 }
 
-void SmartHotelServer::CreateErrorResponse(int code, const char* message, std::string& response)
+void SmartHotelServer::CreateErrorResponse(int code, const char* message, httplib::Response& res)
 {
-	response.clear();
+	std::string response;
 	response.append("{");
 	response.append("\"code\"");
 	response.append(":");
@@ -711,11 +716,13 @@ void SmartHotelServer::CreateErrorResponse(int code, const char* message, std::s
 	response.append(message);
 	response.append("\"");
 	response.append("}");
+
+	res.set_content(response.c_str(), "application/json");
 }
 
-void SmartHotelServer::CreateSuccessResponse(std::string& response)
+void SmartHotelServer::CreateSuccessResponse(httplib::Response& res)
 {
-	response.clear();
+	std::string response;
 	response.append("{");
 	response.append("\"code\"");
 	response.append(":");
@@ -727,11 +734,13 @@ void SmartHotelServer::CreateSuccessResponse(std::string& response)
 	response.append("success");
 	response.append("\"");
 	response.append("}");
+
+	res.set_content(response.c_str(), "application/json");
 }
 
-void SmartHotelServer::CreateSuccessResponse(const char* data, std::string& response)
+void SmartHotelServer::CreateSuccessResponse(const char* data, httplib::Response& res)
 {
-	response.clear();
+	std::string response;
 	response.append("{");
 	response.append("\"code\"");
 	response.append(":");
@@ -749,6 +758,8 @@ void SmartHotelServer::CreateSuccessResponse(const char* data, std::string& resp
 	response.append(data);
 	response.append("\"");
 	response.append("}");
+
+	res.set_content(response.c_str(), "application/json");
 }
 
 void WINAPI SmartHotelServer::IpcMessageCallback(LPCSTR ipc_name,

@@ -17,17 +17,24 @@ public:
 	virtual const char* GetLoginUrl() = 0;
 	virtual const char* GetListUrl() = 0;
 	virtual const char* GetDataUrl() = 0;
-	virtual void SetAuthorized() = 0;
 	virtual bool IsLoginUrl(const char* url) = 0;
 	virtual bool IsListUrl(const char* url) = 0;
 	virtual bool IsDataUrl(const char* url) = 0;
-	virtual bool IsAuthorized() = 0;
 public:
+	virtual void SetAuthorized() = 0;
+	virtual void SetUnauthorized() = 0;
+	virtual bool IsAuthorized() = 0;
+	virtual void WaitAuthorizingStart() = 0;
+	virtual void WaitAuthorizingComplete() = 0;
+	virtual void WaitAuthorizSmsStart() = 0;
+	virtual void WaitAuthorizSmsComplete() = 0;
 	virtual void StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
+	virtual void DoAuthorizing(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
+	virtual void DoAuthorizSms(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
+public:
 	virtual void QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
-	virtual void StartAutoLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 };
 

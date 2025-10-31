@@ -65,7 +65,7 @@ protected:
 	int QueryRobotStatus(const char* id, unsigned int type, char* response, unsigned int response_length);
 	int QueryRobotHotels(const char* id, unsigned int type, char* response, unsigned int response_length);
 	int AuthorizingRobot(const char* id, unsigned int type, char* response, unsigned int response_length);
-	int AuthorizeRobotSms(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int AuthorizeRobotSms(const char* id, const char* code, unsigned int type, char* response, unsigned int response_length);
 protected:
 	int SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length);
 	int SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length, PVOID answer_buffer, DWORD answer_length);
@@ -73,9 +73,9 @@ protected:
 protected:
 	void GetRobotMessageTopic(const char* id, std::string& topic);
 protected:
-	void CreateErrorResponse(int code, const char* message, std::string& response);
-	void CreateSuccessResponse(std::string& response);
-	void CreateSuccessResponse(const char* data, std::string& response);
+	void CreateErrorResponse(int code, const char* message, httplib::Response& res);
+	void CreateSuccessResponse(httplib::Response& res);
+	void CreateSuccessResponse(const char* data, httplib::Response& res);
 private:
 	static void WINAPI IpcMessageCallback(LPCSTR ipc_name,
 		LPCVOID ipc_context,

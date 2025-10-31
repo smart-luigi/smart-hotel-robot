@@ -32,29 +32,35 @@ enum SmartHotelRobotStatus
 	STATUS_ROBOT_AUTHORIZE		= 1,
 };
 
-typedef struct tagRobotMessageHeader
+typedef struct tagMessageRobotHeader
 {
 	unsigned int	message;
 	char			id[12];
 	unsigned int	type;
-} RobotMessageHeader;
+} MessageRobotHeader;
 
-#define CreateRobotMessageHeader(header, _message, _id, _type)	\
+#define CreateMessageRobotHeader(header, _message, _id, _type)	\
 {																\
-	((RobotMessageHeader*)header)->message = _message;			\
-	lstrcpyA(((RobotMessageHeader*)header)->id, _id);			\
-	((RobotMessageHeader*)header)->type = _type;				\
+	((MessageRobotHeader*)header)->message = _message;			\
+	lstrcpyA(((MessageRobotHeader*)header)->id, _id);			\
+	((MessageRobotHeader*)header)->type = _type;				\
 }
 
 typedef struct tagMessageRobotStatus
 {
-	RobotMessageHeader	header;
+	MessageRobotHeader	header;
 	bool				authorized;
 } MessageRobotStatus, *MessageRobotStatusPtr;
 
+typedef struct tagMessageRobotAuthorizeSms
+{
+	MessageRobotHeader	header;
+	char				sms[16];
+} MessageRobotAuthorizeSms, *MessageRobotAuthorizeSmsPtr;
+
 typedef struct tagMessageRobotHotels
 {
-	RobotMessageHeader	header;
+	MessageRobotHeader	header;
 	unsigned int		response_length;
 	char*				response_content;
 } MessageRobotHotels, *MessageRobotHotelsPtr;
