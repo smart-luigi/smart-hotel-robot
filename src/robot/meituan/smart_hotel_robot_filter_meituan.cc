@@ -3,6 +3,7 @@
 
 SmartHotelRobotResponseFilterMeituan::SmartHotelRobotResponseFilterMeituan(SmartHotelRobotContext* context)
     : _context(context)
+    , _robot(context->GetHotelRobot())
 {
 
 }
@@ -21,7 +22,8 @@ cef_response_filter_status_t SmartHotelRobotResponseFilterMeituan::Filter(void* 
 
     if (data_out_written > 0) 
     {
-        memcpy(data_out, data_in, data_out_written);
+        std::memcpy(data_out, data_in, data_out_written);
+        _robot->AddHotels(data_in, data_out_written);
     }
 
     return RESPONSE_FILTER_DONE;

@@ -2,22 +2,26 @@
 #define _SMART_HOTEL_MESSAGE_H_
 #pragma once
 
-#define	MESSAGE_TOPIC_SERVER				"smart-hotel-server"
-#define	MESSAGE_TOPIC_ROBOT					"smart-hotel-robot"
-#define	MESSAGE_SIZE						1024 * 1024
+#define	MESSAGE_TOPIC_SERVER					"smart-hotel-server"
+#define	MESSAGE_TOPIC_ROBOT						"smart-hotel-robot"
+#define	MESSAGE_SIZE							1024 * 1024
 
-#define MESSAGE_ROBOT_START					0x101
-#define MESSAGE_ROBOT_STARTED				0x102
-#define MESSAGE_ROBOT_STOP					0x201
-#define MESSAGE_ROBOT_STOPPED				0x202
-#define MESSAGE_ROBOT_AUTHORIZING			0x301
-#define MESSAGE_ROBOT_AUTHORIZE_SMS			0x302
-#define MESSAGE_ROBOT_AUTHORIZED			0x303
-#define MESSAGE_ROBOT_QUERY_STATUS			0x401
-#define MESSAGE_ROBOT_QUERY_HOTELS			0x402
+#define MESSAGE_ROBOT_START						0x101
+#define MESSAGE_ROBOT_STARTED					0x102
+#define MESSAGE_ROBOT_STOP						0x201
+#define MESSAGE_ROBOT_STOPPED					0x202
+#define MESSAGE_ROBOT_AUTHORIZE_ACCOUNT_START	0x301
+#define MESSAGE_ROBOT_AUTHORIZE_ACCOUNT			0x302
+#define MESSAGE_ROBOT_AUTHORIZE_CODE_START		0x303
+#define MESSAGE_ROBOT_AUTHORIZE_CODE			0x304
+#define MESSAGE_ROBOT_AUTHORIZED				0x305
+#define MESSAGE_ROBOT_QUERY_ACCOUNT				0x401
+#define MESSAGE_ROBOT_QUERY_STATUS				0x402
+#define MESSAGE_ROBOT_QUERY_HOTELS				0x403
 
-#define WM_EXIT								WM_USER + 100
-#define WM_SIMULATE_START					WM_USER + 200
+#define WM_EXIT									WM_USER + 100
+#define WM_LOAD_URL								WM_USER + 200
+#define WM_SIMULATE_START						WM_USER + 300
 
 enum SmartHotelRobotType
 {
@@ -46,17 +50,23 @@ typedef struct tagMessageRobotHeader
 	((MessageRobotHeader*)header)->type = _type;				\
 }
 
+typedef struct tagMessageRobotAuthorizeAccount
+{
+	MessageRobotHeader	header;
+	char				password[32];
+} MessageRobotAuthorizeAccount, *MessageRobotAuthorizeAccountPtr;
+
+typedef struct tagMessageRobotAuthorizeCode
+{
+	MessageRobotHeader	header;
+	char				code[16];
+} MessageRobotAuthorizeCode, *MessageRobotAuthorizeCodePtr;
+
 typedef struct tagMessageRobotStatus
 {
 	MessageRobotHeader	header;
 	bool				authorized;
-} MessageRobotStatus, *MessageRobotStatusPtr;
-
-typedef struct tagMessageRobotAuthorizeSms
-{
-	MessageRobotHeader	header;
-	char				sms[16];
-} MessageRobotAuthorizeSms, *MessageRobotAuthorizeSmsPtr;
+} MessageRobotStatus, * MessageRobotStatusPtr;
 
 typedef struct tagMessageRobotHotels
 {

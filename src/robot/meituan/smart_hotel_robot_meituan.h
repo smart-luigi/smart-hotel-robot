@@ -20,37 +20,49 @@ protected:
 protected:
 	virtual SmartHotelRobotType GetRobotType() override;
 	virtual const char* GetLoginUrl() override;
+	virtual const char* GetAccountUrl() override;
 	virtual const char* GetListUrl() override;
 	virtual const char* GetDataUrl() override;
 	virtual bool IsLoginUrl(const char* url) override;
 	virtual bool IsListUrl(const char* url) override;
 	virtual bool IsDataUrl(const char* url) override;
+	virtual const char* GetData() override;
 protected:
 	virtual void SetAuthorized() override;
 	virtual void SetUnauthorized() override;
 	virtual bool IsAuthorized() override;
-	virtual void WaitAuthorizingStart() override;
-	virtual void WaitAuthorizingComplete() override;
-	virtual void WaitAuthorizSmsStart() override;
-	virtual void WaitAuthorizSmsComplete() override;
-	virtual void StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
-	virtual void StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
-	virtual void DoAuthorizing(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
-	virtual void DoAuthorizSms(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
+	virtual void AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
+	virtual void AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
+	virtual void QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
+	virtual void AddHotels(void* data, size_t data_size) override;
 protected:
-	virtual void QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
-	virtual void QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
-	virtual void StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
+	virtual void HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleAuthorizeCodeStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleAuthorizeCode(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleQueryAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleQueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+	virtual void HandleQueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
+protected:
+	virtual void WaitAuthorizingCodeStart();
+	virtual void WaitAuthorizingCodeComplete();
+	virtual void WaitAuthorizCodeStart();
+	virtual void WaitAuthorizCodeComplete();
+	virtual void DoAuthorizingCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url);
+	virtual void DoAuthorizCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url);
 protected:
 	SmartHotelRobotContext* _context;
 	std::string				_url_login;
+	std::string				_url_account;
 	std::string				_url_list;
 	std::string				_url_data;
 	std::atomic<bool>		_authorized;
-	HANDLE					_authorizing_start_event;
-	HANDLE					_authorizing_complete_event;
-	HANDLE					_authoriz_sms_start_event;
-	HANDLE					_authoriz_sms_complete_event;
+	HANDLE					_authorizing_code_start_event;
+	HANDLE					_authorizing_code_complete_event;
+	HANDLE					_authorize_code_start_event;
+	HANDLE					_authorize_code_complete_event;
+	std::string				_authorize_code;
+	std::string				_hotels_data;
 };
 
 #endif // !_SMART_HOTEL_ROBOT_MEITUAN_H_

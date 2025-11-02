@@ -38,6 +38,11 @@ public:
 	int SendServerMessageRobotStarted();
 	int SendServerMessageRobotStopped();
 	int SendServerMessageRobotAuthorizeCompleted(char* sms, DWORD sms_length);
+public:
+	int SendWindowMessage(HWND hwnd, unsigned int message);
+	int SendWindowMessage(HWND hwnd, unsigned int message, WPARAM wparam, LPARAM lparam);
+	int PostWindowMessage(HWND hwnd, unsigned int message);
+	int PostWindowMessage(HWND hwnd, unsigned int message, WPARAM wparam, LPARAM lparam);
 protected:
 	int InitCacheEnviroment(int argc, wchar_t** argv, const wchar_t* cache_env_id, const wchar_t* cache_env_type);
 	int InitHotelRobot();

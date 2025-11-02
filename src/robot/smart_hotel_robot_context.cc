@@ -203,6 +203,29 @@ int SmartHotelRobotContext::SendServerMessageRobotAuthorizeCompleted(char* sms, 
 	return ERROR_SUCCESS;
 }
 
+int SmartHotelRobotContext::SendWindowMessage(HWND hwnd, unsigned int message)
+{
+	return SendWindowMessage(hwnd, message, 0, 0);
+}
+
+int SmartHotelRobotContext::SendWindowMessage(HWND hwnd, unsigned int message, WPARAM wparam, LPARAM lparam)
+{
+	return (int)SendMessage(hwnd, message, wparam, lparam);
+}
+
+int SmartHotelRobotContext::PostWindowMessage(HWND hwnd, unsigned int message)
+{
+	return PostWindowMessage(hwnd, message, 0, 0);;
+}
+
+int SmartHotelRobotContext::PostWindowMessage(HWND hwnd, unsigned int message, WPARAM wparam, LPARAM lparam)
+{
+	if (!PostMessage(hwnd, message, wparam, lparam))
+		return GetLastError();
+
+	return ERROR_SUCCESS;
+}
+
 int SmartHotelRobotContext::InitCacheEnviroment(int argc, wchar_t** argv, const wchar_t* cache_env_id, const wchar_t* cache_env_type)
 {
 	int result = ERROR_SUCCESS;
@@ -356,17 +379,26 @@ int SmartHotelRobotContext::HandleMessage(LPCSTR ipc_name,
 			PostMessage(_application->GetRootWindowHandle(), WM_DESTROY, 0, 0);
 		}
 		break;
-	case MESSAGE_ROBOT_AUTHORIZING:
-		_hotel_robot->StartAuthorizing(message_buffer, message_length, answer_buffer, answer_length);
+	case MESSAGE_ROBOT_AUTHORIZE_ACCOUNT_START:
+		_hotel_robot->HandleAuthorizeAccountStart(message_buffer, message_length, answer_buffer, answer_length);
 		break;
-	case MESSAGE_ROBOT_AUTHORIZE_SMS:
-		_hotel_robot->StartAuthorizeSms(message_buffer, message_length, answer_buffer, answer_length);
+	case MESSAGE_ROBOT_AUTHORIZE_ACCOUNT:
+		_hotel_robot->HandleAuthorizeAccount(message_buffer, message_length, answer_buffer, answer_length);
+		break;
+	case MESSAGE_ROBOT_AUTHORIZE_CODE_START:
+		_hotel_robot->HandleAuthorizeCodeStart(message_buffer, message_length, answer_buffer, answer_length);
+		break;
+	case MESSAGE_ROBOT_AUTHORIZE_CODE:
+		_hotel_robot->HandleAuthorizeCode(message_buffer, message_length, answer_buffer, answer_length);
+		break;
+	case MESSAGE_ROBOT_QUERY_ACCOUNT:
+		_hotel_robot->HandleQueryAccount(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	case MESSAGE_ROBOT_QUERY_STATUS:
-		_hotel_robot->QueryStatus(message_buffer, message_length, answer_buffer, answer_length);
+		_hotel_robot->HandleQueryStatus(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	case MESSAGE_ROBOT_QUERY_HOTELS:
-		_hotel_robot->QueryHotels(message_buffer, message_length, answer_buffer, answer_length);
+		_hotel_robot->HandleQueryHotels(message_buffer, message_length, answer_buffer, answer_length);
 		break;
 	default:
 		break;

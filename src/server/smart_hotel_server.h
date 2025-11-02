@@ -51,21 +51,27 @@ protected:
 		LPVOID  answer_buffer,
 		DWORD   answer_length);
 protected:
-	void OnHttpHandleStartRobot(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleStopRobot(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleQueryRobotStatus(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleQueryRobotHotels(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleAuthorizingRobot(const httplib::Request& req, httplib::Response& res);
-	void OnHttpHandleAuthorizeRobotSms(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotStart(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotStop(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotAuthorizeAccountStart(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotAuthorizeAccount(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotAuthorizeCodeStart(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotAuthorizeCode(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotQueryStatus(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotQueryAccount(const httplib::Request& req, httplib::Response& res);
+	void OnHttpHandleRobotQueryHotels(const httplib::Request& req, httplib::Response& res);
 	bool OnHttpHandleValidateParameters(const httplib::Request& req, httplib::Response& res, std::string& phone, unsigned int* type);
 	void OnHttpHandleError(const httplib::Request& req, httplib::Response& res);
 protected:
-	int StartRobot(const char* id, unsigned int type);
-	int StopRobot(const char* id, unsigned int type);
-	int QueryRobotStatus(const char* id, unsigned int type, char* response, unsigned int response_length);
-	int QueryRobotHotels(const char* id, unsigned int type, char* response, unsigned int response_length);
-	int AuthorizingRobot(const char* id, unsigned int type, char* response, unsigned int response_length);
-	int AuthorizeRobotSms(const char* id, const char* code, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotStart(const char* id, unsigned int type);
+	int HandleRobotStop(const char* id, unsigned int type);
+	int HandleRobotAuthorizeAccountStart(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotAuthorizeAccount(const char* id, const char* password, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotAuthorizeCodeStart(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotAuthorizeCode(const char* id, const char* code, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotQueryAccount(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotQueryStatus(const char* id, unsigned int type, char* response, unsigned int response_length);
+	int HandleRobotQueryHotels(const char* id, unsigned int type, char* response, unsigned int response_length);
 protected:
 	int SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length);
 	int SendRobotMessage(const char* id, unsigned int type, LPCVOID message_buffer, DWORD message_length, PVOID answer_buffer, DWORD answer_length);

@@ -40,7 +40,7 @@ CefRefPtr<CefResponseFilter> SmartHotelRobotResourceHandler::GetResourceResponse
 	CefRefPtr<CefResponse> response) 
 {
 	CefString* url = new CefString(request->GetURL());
-	if (_robot->IsListUrl(url->ToString().c_str()))
+	if (_robot->IsDataUrl(url->ToString().c_str()))
 	{
 		return _response_filter;
 	}
@@ -64,28 +64,15 @@ void SmartHotelRobotResourceHandler::OnResourceLoadComplete(CefRefPtr<CefBrowser
 		if (_robot->IsLoginUrl(url->ToString().c_str()))
 		{
 			_robot->SetUnauthorized();
-
-			_robot->WaitAuthorizingStart();
-
-			_robot->DoAuthorizing(browser, frame, *url);
-
-			_robot->WaitAuthorizingComplete();
-
-			_robot->WaitAuthorizSmsStart();
-
-			_robot->DoAuthorizSms(browser, frame, *url);
-
-			_robot->WaitAuthorizSmsComplete();
-
+			_robot->AuthorizeCode(browser, frame, *url);
 			break;
 		}
 
 		if (_robot->IsListUrl(url->ToString().c_str()))
 		{
 			_robot->SetAuthorized();
-			//_robot->StartScrollList(browser, frame, *url);
+			_robot->QueryHotels(browser, frame, *url);
 			break;
 		}
-
 	} while (false);
 }

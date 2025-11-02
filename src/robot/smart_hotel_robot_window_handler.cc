@@ -28,6 +28,16 @@ LRESULT SmartHotelRobotWindowHandler::HandleWindowMessage(HWND hwnd, UINT messag
 	case WM_EXIT:
 		ExitProcess(ERROR_SUCCESS);
 		break;
+	case WM_LOAD_URL:
+		{
+			CefRefPtr<CefBrowser> browser = _context->GetApplication()->GetBrowser(hwnd);
+			if (browser)
+			{
+				const char* url = (const char*)wparam;
+				browser->GetFocusedFrame()->LoadURL(url);
+			}
+		}
+		break;
 	case WM_SIMULATE_START:
 		result = HandleMessageSimulateStart(hwnd);
 		break;

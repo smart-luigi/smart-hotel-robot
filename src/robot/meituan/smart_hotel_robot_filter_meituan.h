@@ -20,6 +20,7 @@ private:
 	DISALLOW_COPY_AND_ASSIGN(SmartHotelRobotResponseFilterMeituan);
 private:
 	SmartHotelRobotContext*	_context;
+	SmartHotelRobot*		_robot;
 };
 
 #endif // !_DEFAULT_CEF_RESPONSE_FILTER_H_

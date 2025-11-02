@@ -19,7 +19,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 			break;
 		}
 
-		SmartLogInfo("Startup Smart Hotel Robot....");
+		SmartLogInfo("Smart Hotel Robot Startup....");
 		
 		int app_type = CefClientApplicationManager::GetClientAppType();
 		if (app_type == CEF_APP_TYPE_BROWSER)
@@ -58,7 +58,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 		config.with_maximizebox = false;
 		config.enable_singleton = false;
 		config.with_osr = false;
-		config.with_dev = false;
+		config.with_dev = true;
 		if (context && context->ValidateCacheEnviroment())
 		{
 			lstrcpyA(config.window_title, context->GetWindowTitle());
@@ -85,7 +85,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 		app->SetWindowMessageHandler(new SmartHotelRobotWindowHandler(context));
 		app->SetBrowserResourceHandler(new SmartHotelRobotResourceHandler(context));
 
-		SmartLogInfo("Startup Smart Hotel Robot Completed");
+		SmartLogInfo("Smart Hotel Robot Started");
 
 		result = app->Execute();
 

@@ -4,41 +4,42 @@
 SmartHotelRobotMeituan::SmartHotelRobotMeituan(SmartHotelRobotContext* context)
 	: _context(context)
 	, _url_login("https://passport.meituan.com/useraccount/ilogin")
+	, _url_account("https://i.meituan.com/mttouch/page/account")
 	, _url_list("https://i.meituan.com/awp/h5/hotel/list/list.html")
-	, _url_data("https://i.meituan.com/awp/h5/hotel/list/list.html")
+	, _url_data("https://ihotel.meituan.com/hbsearch/HotelSearch")
 	, _authorized(false)
-	, _authorizing_start_event(nullptr)
-	, _authorizing_complete_event(nullptr)
-	, _authoriz_sms_start_event(nullptr)
-	, _authoriz_sms_complete_event(nullptr)
+	, _authorizing_code_start_event(nullptr)
+	, _authorizing_code_complete_event(nullptr)
+	, _authorize_code_start_event(nullptr)
+	, _authorize_code_complete_event(nullptr)
 {
 
 }
 
 SmartHotelRobotMeituan::~SmartHotelRobotMeituan()
 {
-	if (_authoriz_sms_complete_event)
+	if (_authorize_code_complete_event)
 	{
-		CloseHandle(_authoriz_sms_complete_event);
-		_authoriz_sms_complete_event = nullptr;
+		CloseHandle(_authorize_code_complete_event);
+		_authorize_code_complete_event = nullptr;
 	}
 
-	if (_authoriz_sms_start_event)
+	if (_authorize_code_start_event)
 	{
-		CloseHandle(_authoriz_sms_start_event);
-		_authoriz_sms_start_event = nullptr;
+		CloseHandle(_authorize_code_start_event);
+		_authorize_code_start_event = nullptr;
 	}
 
-	if (_authorizing_complete_event)
+	if (_authorizing_code_complete_event)
 	{
-		CloseHandle(_authorizing_complete_event);
-		_authorizing_complete_event = nullptr;
+		CloseHandle(_authorizing_code_complete_event);
+		_authorizing_code_complete_event = nullptr;
 	}
 
-	if (_authorizing_start_event)
+	if (_authorizing_code_start_event)
 	{
-		CloseHandle(_authorizing_start_event);
-		_authorizing_start_event = nullptr;
+		CloseHandle(_authorizing_code_start_event);
+		_authorizing_code_start_event = nullptr;
 	}
 }
 
@@ -48,29 +49,29 @@ int SmartHotelRobotMeituan::Init()
 
 	do
 	{
-		_authorizing_start_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authorizing_start_event == nullptr)
+		_authorizing_code_start_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorizing_code_start_event == nullptr)
 		{
 			result = GetLastError();
 			break;
 		}
 
-		_authorizing_complete_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authorizing_complete_event == nullptr)
+		_authorizing_code_complete_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorizing_code_complete_event == nullptr)
 		{
 			result = GetLastError();
 			break;
 		}
 
-		_authoriz_sms_start_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authoriz_sms_start_event == nullptr)
+		_authorize_code_start_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_code_start_event == nullptr)
 		{
 			result = GetLastError();
 			break;
 		}
 
-		_authoriz_sms_complete_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authoriz_sms_complete_event == nullptr)
+		_authorize_code_complete_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_code_complete_event == nullptr)
 		{
 			result = GetLastError();
 			break;
@@ -94,6 +95,11 @@ SmartHotelRobotType SmartHotelRobotMeituan::GetRobotType()
 const char* SmartHotelRobotMeituan::GetLoginUrl()
 {
 	return _url_login.c_str();
+}
+
+const char* SmartHotelRobotMeituan::GetAccountUrl()
+{
+	return _url_account.c_str();
 }
 
 const char* SmartHotelRobotMeituan::GetListUrl()
@@ -121,6 +127,11 @@ bool SmartHotelRobotMeituan::IsDataUrl(const char* url)
 	return boost::istarts_with(url, _url_data);
 }
 
+const char* SmartHotelRobotMeituan::GetData()
+{
+	return _hotels_data.c_str();
+}
+
 void SmartHotelRobotMeituan::SetAuthorized()
 {
 	_authorized = true;
@@ -136,119 +147,105 @@ bool SmartHotelRobotMeituan::IsAuthorized()
 	return _authorized;
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizingStart()
+void SmartHotelRobotMeituan::AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	WaitForSingleObject(_authorizing_start_event, INFINITE);
+	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotMeituan* robot) {
+
+
+	}, browser, frame, url, this).detach();
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizingComplete()
+void SmartHotelRobotMeituan::AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	WaitForSingleObject(_authorizing_complete_event, INFINITE);
+	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotMeituan* robot) {
+
+		robot->WaitAuthorizingCodeStart();
+
+		robot->DoAuthorizingCode(browser, frame, url);
+
+		robot->WaitAuthorizingCodeComplete();
+
+		robot->WaitAuthorizCodeStart();
+
+		robot->DoAuthorizCode(browser, frame, url);
+
+		robot->WaitAuthorizCodeComplete();
+
+	}, browser, frame, url, this).detach();
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizSmsStart()
+void SmartHotelRobotMeituan::QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	WaitForSingleObject(_authoriz_sms_start_event, INFINITE);
-}
-
-void SmartHotelRobotMeituan::WaitAuthorizSmsComplete()
-{
-	WaitForSingleObject(_authoriz_sms_complete_event, INFINITE);
-}
-
-void SmartHotelRobotMeituan::StartAuthorizing(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
-	SetEvent(_authorizing_start_event);
-}
-
-void SmartHotelRobotMeituan::StartAuthorizeSms(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
-	SetEvent(_authoriz_sms_start_event);
-}
-
-void SmartHotelRobotMeituan::DoAuthorizing(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
-{
-	std::thread([](CefRefPtr<CefFrame> frame, const CefString& url, HANDLE authorize_complete_event, SmartHotelRobotContext* context) {
-		std::string id = context->GetCacheEnviromentId();
-		std::string code_authorizing = R"(
-				var iloginUserConfirm = document.getElementById("iloginUserConfirm");
-				if(iloginUserConfirm) {
-					iloginUserConfirm.click();
+	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) {
+		Sleep(3000);
+		std::string code_scroll = R"(		
+			var text = document.body.innerHTML;
+			var searchText = "没有更多了";
+			var timeId = setInterval(function(){
+				debugger;
+				if(text.indexOf(searchText) === -1) {
+					window.scrollBy(0, document.body.scrollHeight);
+				} else {
+					clearInterval(timeId);
 				}
-
-				var phoneNumInput = document.getElementById("phoneNumInput");
-				if(phoneNumInput) {
-					phoneNumInput.value = "XXXXXXXXXXX";
-					phoneNumInput.focus();
-				}
-
-				var codeInput = document.getElementById("codeInput");
-				if(codeInput) {
-					codeInput.focus();
-				}
-
-				var sendCodeBtn = document.getElementById("sendCodeBtn");
-				if(sendCodeBtn) {
-					sendCodeBtn.click();
-					codeInput.focus();
-				}
+			}, 2000);
 		)";
 
-		boost::replace_all(code_authorizing, "XXXXXXXXXXX", id);
+		char* utf8_code_scroll = (char*)SmartMemAlloc(code_scroll.length() * 4);
+		if (utf8_code_scroll == nullptr)
+			return;
 
-		Sleep(2000);
+		if(!SmartStrA2U(utf8_code_scroll, code_scroll.c_str()))
+		{
+			SmartMemFree(utf8_code_scroll);
+			utf8_code_scroll = nullptr;
+			return;
+		}
 
-		frame->ExecuteJavaScript(code_authorizing, url, 0);
+		frame->ExecuteJavaScript(utf8_code_scroll, url, 0);
 
-		Sleep(1000);
+		if(utf8_code_scroll)
+		{
+			SmartMemFree(utf8_code_scroll);
+			utf8_code_scroll = nullptr;
+		}
 
-		SetEvent(authorize_complete_event);
-
-		}, frame, url, _authorizing_complete_event, _context).detach();
+	}, browser, frame, url).detach();
 }
 
-void SmartHotelRobotMeituan::DoAuthorizSms(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::AddHotels(void* data, size_t data_size)
 {
-	std::thread([](CefRefPtr<CefFrame> frame, const CefString& url, HANDLE authorize_complete_event, SmartHotelRobotContext* context) {
-		std::string id = context->GetCacheEnviromentId();
-		std::string code_authorizing = R"(
-				var iloginUserConfirm = document.getElementById("iloginUserConfirm");
-				if(iloginUserConfirm) {
-					iloginUserConfirm.click();
-				}
-
-				var phoneNumInput = document.getElementById("phoneNumInput");
-				if(phoneNumInput) {
-					phoneNumInput.value = "XXXXXXXXXXX";
-					phoneNumInput.focus();
-				}
-
-				var codeInput = document.getElementById("codeInput");
-				if(codeInput) {
-					codeInput.focus();
-				}
-
-				var sendCodeBtn = document.getElementById("sendCodeBtn");
-				if(sendCodeBtn) {
-					sendCodeBtn.click();
-					codeInput.focus();
-				}
-		)";
-
-		boost::replace_all(code_authorizing, "XXXXXXXXXXX", id);
-
-		Sleep(2000);
-
-		frame->ExecuteJavaScript(code_authorizing, url, 0);
-
-		Sleep(1000);
-
-		SetEvent(authorize_complete_event);
-
-		}, frame, url, _authorizing_complete_event, _context).detach();
+	_hotels_data.append((char*)data);
 }
 
-void SmartHotelRobotMeituan::QueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+void SmartHotelRobotMeituan::HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+
+}
+
+void SmartHotelRobotMeituan::HandleAuthorizeCodeStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+	SetEvent(_authorizing_code_start_event);
+}
+
+void SmartHotelRobotMeituan::HandleAuthorizeCode(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+	MessageRobotAuthorizeCodePtr message = (MessageRobotAuthorizeCodePtr)message_buffer;
+	if (message == nullptr)
+		return;
+
+	_authorize_code.clear();
+	_authorize_code.append(message->code);
+
+	SetEvent(_authorize_code_start_event);
+}
+
+void SmartHotelRobotMeituan::HandleQueryAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+	_context->PostWindowMessage(_context->GetApplication()->GetRootWindowHandle(), WM_LOAD_URL, (WPARAM)GetAccountUrl(), 0);
+}
+
+void SmartHotelRobotMeituan::HandleQueryStatus(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
 {
 	MessageRobotHeader* message_in = (MessageRobotHeader*)message_buffer;
 	MessageRobotStatus* message_out = (MessageRobotStatus*)answer_buffer;
@@ -256,29 +253,115 @@ void SmartHotelRobotMeituan::QueryStatus(const void* message_buffer, unsigned in
 	message_out->authorized = _authorized;
 }
 
-void SmartHotelRobotMeituan::QueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+void SmartHotelRobotMeituan::HandleQueryHotels(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
 {
+	std::memset(answer_buffer, 0, answer_length);
 
+	size_t data_length = _hotels_data.length();
+	if (data_length <= answer_length)
+	{
+		std::memcpy(answer_buffer, _hotels_data.c_str(), _hotels_data.size());
+	}
+	else
+	{
+		std::memcpy(answer_buffer, _hotels_data.c_str(), answer_length);
+	}
 }
 
-void SmartHotelRobotMeituan::StartScrollList(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::WaitAuthorizingCodeStart()
 {
-	cef_mouse_event_t event;
-	event.modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
-	event.x = 100;
-	event.y = 100;
-	browser->GetHost()->SendMouseWheelEvent(event, 200, 200);
+	WaitForSingleObject(_authorizing_code_start_event, INFINITE);
+	ResetEvent(_authorizing_code_start_event);
+}
 
-	//_context->SendServerMessage(MESSAGE_ROBOT_HOTEL_LIST_READY, nullptr, 0, nullptr, nullptr);
+void SmartHotelRobotMeituan::WaitAuthorizingCodeComplete()
+{
+	WaitForSingleObject(_authorizing_code_complete_event, INFINITE);
+	ResetEvent(_authorizing_code_complete_event);
+}
 
-	/*
-	HWND hwnd = FindWindowA("SmartCefWindow", "SmartCefApp");
-	if (hwnd)
-	{
-		std::thread([](HWND hwnd) {
-			Sleep(3000);
-			PostMessage(hwnd, WM_SIMULATE_START, 0, 0);
-		}, hwnd).detach();
-	}
-	*/
+void SmartHotelRobotMeituan::WaitAuthorizCodeStart()
+{
+	WaitForSingleObject(_authorize_code_start_event, INFINITE);
+	ResetEvent(_authorize_code_start_event);
+}
+
+void SmartHotelRobotMeituan::WaitAuthorizCodeComplete()
+{
+	WaitForSingleObject(_authorize_code_complete_event, INFINITE);
+	ResetEvent(_authorize_code_complete_event);
+}
+
+void SmartHotelRobotMeituan::HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+	SetEvent(_authorizing_code_start_event);
+}
+
+void SmartHotelRobotMeituan::DoAuthorizingCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+{
+	std::string id = _context->GetCacheEnviromentId();
+	std::string code_authorizing = R"(
+		var iloginUserConfirm = document.getElementById("iloginUserConfirm");
+		if(iloginUserConfirm) {
+			iloginUserConfirm.click();
+		}
+
+		var phoneNumInput = document.getElementById("phoneNumInput");
+		if(phoneNumInput) {
+			phoneNumInput.value = "XXXXXXXXXXX";
+			phoneNumInput.focus();
+		}
+
+		var codeInput = document.getElementById("codeInput");
+		if(codeInput) {
+			codeInput.focus();
+		}
+		
+		setTimeout(function(){
+			var sendCodeBtn = document.getElementById("sendCodeBtn");
+			if(sendCodeBtn) {
+				sendCodeBtn.click();
+				phoneNumInput.focus();
+			}
+		}, 1000);
+	)";
+
+	boost::replace_all(code_authorizing, "XXXXXXXXXXX", id);
+
+	Sleep(1000);
+
+	frame->ExecuteJavaScript(code_authorizing, url, 0);
+
+	SetEvent(_authorizing_code_complete_event);
+}
+
+void SmartHotelRobotMeituan::DoAuthorizCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+{
+	std::string code_authoriz_code = R"(
+		var codeInput = document.getElementById("codeInput");
+		if(codeInput) {
+			codeInput.value = "000000";
+			codeInput.focus();
+		}
+
+		var phoneNumInput = document.getElementById("phoneNumInput");
+		if(phoneNumInput) {
+			phoneNumInput.focus();
+		}
+
+		if(codeInput) {
+			codeInput.focus();
+		}
+
+		var iloginBtn = document.getElementById("iloginBtn");
+		if(iloginBtn) {
+			iloginBtn.click();
+		}
+	)";
+
+	boost::replace_all(code_authoriz_code, "000000", _authorize_code);
+
+	frame->ExecuteJavaScript(code_authoriz_code, url, 0);
+
+	SetEvent(_authorize_code_complete_event);
 }
