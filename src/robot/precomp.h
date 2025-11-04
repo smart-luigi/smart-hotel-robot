@@ -15,6 +15,7 @@
 #include <thread>
 
 #include <boost/algorithm/string.hpp>
+#include <gumbo.h>
 #include <smart_base.h>
 #include <smart_adv.h>
 #include <smart_cef_client.h>

@@ -1,4 +1,5 @@
 #include <boost/smart_ptr.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <windows.h>
 #include <shellapi.h>
 #include <shlwapi.h>
@@ -427,7 +428,7 @@ void SmartHotelServer::OnHttpHandleRobotAuthorizeAccountStart(const httplib::Req
 	int result = HandleRobotAuthorizeAccountStart(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, false, res);
 	}
 	else
 	{
@@ -468,7 +469,7 @@ void SmartHotelServer::OnHttpHandleRobotAuthorizeAccount(const httplib::Request&
 	int result = HandleRobotAuthorizeAccount(phone.c_str(), password.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, false, res);
 	}
 	else
 	{
@@ -496,7 +497,7 @@ void SmartHotelServer::OnHttpHandleRobotAuthorizeCodeStart(const httplib::Reques
 	int result = HandleRobotAuthorizeCodeStart(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, false, res);
 	}
 	else
 	{
@@ -537,7 +538,7 @@ void SmartHotelServer::OnHttpHandleRobotAuthorizeCode(const httplib::Request& re
 	int result = HandleRobotAuthorizeCode(phone.c_str(), code.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, false, res);
 	}
 	else
 	{
@@ -565,7 +566,7 @@ void SmartHotelServer::OnHttpHandleRobotQueryAccount(const httplib::Request& req
 	int result = HandleRobotQueryAccount(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, false, res);
 	}
 	else
 	{
@@ -600,7 +601,7 @@ void SmartHotelServer::OnHttpHandleRobotQueryStatus(const httplib::Request& req,
 		}
 		else
 		{
-			CreateSuccessResponse(std::to_string(status_message->authorized).c_str(), res);
+			CreateSuccessResponse(std::to_string(status_message->authorized).c_str(), false, res);
 		}
 	}
 	else
@@ -629,7 +630,7 @@ void SmartHotelServer::OnHttpHandleRobotQueryHotels(const httplib::Request& req,
 	int result = HandleRobotQueryHotels(phone.c_str(), type, message, MESSAGE_SIZE);
 	if (result == ERROR_SUCCESS)
 	{
-		CreateSuccessResponse(message, res);
+		CreateSuccessResponse(message, true, res);
 	}
 	else
 	{
@@ -831,62 +832,57 @@ void SmartHotelServer::GetRobotMessageTopic(const char* id, std::string& topic)
 
 void SmartHotelServer::CreateErrorResponse(int code, const char* message, httplib::Response& res)
 {
-	std::string response;
-	response.append("{");
-	response.append("\"code\"");
-	response.append(":");
-	response.append(std::to_string(code));
-	response.append(",");
-	response.append("\"message\"");
-	response.append(":");
-	response.append("\"");
-	response.append(message);
-	response.append("\"");
-	response.append("}");
+	boost::property_tree::ptree response;
+	response.put<int>("code", code);
+	response.put<std::string>("message", message);
 
-	res.set_content(response.c_str(), "application/json");
+	std::ostringstream oss;
+	boost::property_tree::write_json(oss, response);
+
+	res.set_content(oss.str().c_str(), "application/json");
 }
 
 void SmartHotelServer::CreateSuccessResponse(httplib::Response& res)
 {
-	std::string response;
-	response.append("{");
-	response.append("\"code\"");
-	response.append(":");
-	response.append(std::to_string(0));
-	response.append(",");
-	response.append("\"message\"");
-	response.append(":");
-	response.append("\"");
-	response.append("success");
-	response.append("\"");
-	response.append("}");
+	boost::property_tree::ptree response;
+	response.put<int>("code", ERROR_SUCCESS);
+	response.put<std::string>("message", "success");
 
-	res.set_content(response.c_str(), "application/json");
+	std::ostringstream oss;
+	boost::property_tree::write_json(oss, response);
+
+	res.set_content(oss.str().c_str(), "application/json");
 }
 
-void SmartHotelServer::CreateSuccessResponse(const char* data, httplib::Response& res)
+void SmartHotelServer::CreateSuccessResponse(const char* data, bool array, httplib::Response& res)
 {
-	std::string response;
-	response.append("{");
-	response.append("\"code\"");
-	response.append(":");
-	response.append(std::to_string(0));
-	response.append(",");
-	response.append("\"message\"");
-	response.append(":");
-	response.append("\"");
-	response.append("success");
-	response.append("\"");
-	response.append(",");
-	response.append("\"data\"");
-	response.append(":");
-	response.append("\"");
-	response.append(data);
-	response.append("\"");
-	response.append("}");
+	char* data_utf8 = (char*)SmartMemAlloc(lstrlenA(data) * 3);
+	SmartStrA2U(data_utf8, data);
 
-	res.set_content(response.c_str(), "application/json");
+	boost::property_tree::ptree response;
+	response.put<int>("code", ERROR_SUCCESS);
+	response.put<std::string>("message", "success");
+	if (array)
+	{
+		boost::property_tree::ptree json;
+		boost::property_tree::read_json(data, json);
+		response.push_back(std::make_pair("", json));
+	}
+	else
+	{
+		response.put<std::string>("data", data);
+	}
+
+	std::ostringstream oss;
+	boost::property_tree::write_json(oss, response);
+
+	res.set_content(oss.str().c_str(), "application/json");
+
+	if (data_utf8)
+	{
+		SmartMemFree(data_utf8);
+		data_utf8 = nullptr;
+	}
 }
 
 void WINAPI SmartHotelServer::IpcMessageCallback(LPCSTR ipc_name,

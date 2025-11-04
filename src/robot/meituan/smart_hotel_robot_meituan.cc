@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include <boost/property_tree/json_parser.hpp>
 #include "meituan/smart_hotel_robot_meituan.h"
 
 SmartHotelRobotMeituan::SmartHotelRobotMeituan(SmartHotelRobotContext* context)
@@ -41,6 +42,18 @@ SmartHotelRobotMeituan::~SmartHotelRobotMeituan()
 		CloseHandle(_authorizing_code_start_event);
 		_authorizing_code_start_event = nullptr;
 	}
+
+	for (auto it = _hotels_set.begin(); it != _hotels_set.end(); it++)
+	{
+		MessageRobotHotel* hotel = *it;
+		if (hotel)
+		{
+			SmartMemFree(hotel);
+			hotel = nullptr;
+		}
+	}
+
+	_hotels_set.clear();
 }
 
 int SmartHotelRobotMeituan::Init()
@@ -129,7 +142,43 @@ bool SmartHotelRobotMeituan::IsDataUrl(const char* url)
 
 const char* SmartHotelRobotMeituan::GetData()
 {
+	boost::property_tree::ptree items;
+	for (auto it = _hotels_set.begin(); it != _hotels_set.end(); it++)
+	{
+		MessageRobotHotel* hotel = *it;
+		if (hotel)
+		{
+			boost::property_tree::ptree item;
+			item.put<int>("index", hotel->index);
+			item.put<std::string>("image", hotel->image);
+			item.put<std::string>("title", hotel->title);
+			item.put<std::string>("score", hotel->score);
+			item.put<std::string>("feedback", hotel->feedback);
+			item.put<std::string>("star", hotel->star);
+			item.put<std::string>("address", hotel->address);
+			item.put<std::string>("price", hotel->price);
+			item.put<std::string>("orig_price", hotel->orig_price);
+			item.put<std::string>("bought", hotel->bought);
+			items.push_back(std::make_pair("", item));
+		}
+	}
+
+	boost::property_tree::ptree doc;
+	doc.add_child("data", items);
+
+	std::ostringstream oss;
+	boost::property_tree::write_json(oss, doc);
+
+	_hotels_data.clear();
+	_hotels_data.assign(oss.str().c_str());
+	
 	return _hotels_data.c_str();
+}
+
+void SmartHotelRobotMeituan::SetData(const char* data)
+{
+	_hotels_data.clear();
+	_hotels_data.append(data);
 }
 
 void SmartHotelRobotMeituan::SetAuthorized()
@@ -178,17 +227,24 @@ void SmartHotelRobotMeituan::QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPt
 {
 	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) {
 		Sleep(3000);
-		std::string code_scroll = R"(		
-			var text = document.body.innerHTML;
-			var searchText = "没有更多了";
-			var timeId = setInterval(function(){
-				debugger;
-				if(text.indexOf(searchText) === -1) {
-					window.scrollBy(0, document.body.scrollHeight);
+		std::string code_scroll = R"(
+			var scrollHeight = 0;
+			function ScrollPage() {
+				if(scrollHeight >= document.body.scrollHeight) {
+					window.cefQuery({
+						request: document.body.innerHTML,
+						onSuccess: function(response) {},
+						onFailure: function(error_code, error_message) {}
+					});
 				} else {
-					clearInterval(timeId);
+					window.scrollBy(0, document.body.scrollHeight);
+					scrollHeight = document.body.scrollHeight;
+					setTimeout(function() {
+						ScrollPage();
+					}, 2000);
 				}
-			}, 2000);
+			}
+			ScrollPage();
 		)";
 
 		char* utf8_code_scroll = (char*)SmartMemAlloc(code_scroll.length() * 4);
@@ -213,9 +269,14 @@ void SmartHotelRobotMeituan::QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPt
 	}, browser, frame, url).detach();
 }
 
-void SmartHotelRobotMeituan::AddHotels(void* data, size_t data_size)
+void SmartHotelRobotMeituan::AddHotel(MessageRobotHotel* hotel)
 {
-	_hotels_data.append((char*)data);
+	MessageRobotHotel* item = (MessageRobotHotel*)SmartMemAlloc(sizeof(MessageRobotHotel));
+	if (item)
+	{
+		std::memcpy(item, hotel, sizeof(MessageRobotHotel));
+		_hotels_set.insert(item);
+	}
 }
 
 void SmartHotelRobotMeituan::HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
@@ -257,14 +318,15 @@ void SmartHotelRobotMeituan::HandleQueryHotels(const void* message_buffer, unsig
 {
 	std::memset(answer_buffer, 0, answer_length);
 
-	size_t data_length = _hotels_data.length();
+	const char* data = GetData();
+	size_t data_length = lstrlenA(data);
 	if (data_length <= answer_length)
 	{
-		std::memcpy(answer_buffer, _hotels_data.c_str(), _hotels_data.size());
+		std::memcpy(answer_buffer, data, data_length);
 	}
 	else
 	{
-		std::memcpy(answer_buffer, _hotels_data.c_str(), answer_length);
+		std::memcpy(answer_buffer, data, answer_length);
 	}
 }
 

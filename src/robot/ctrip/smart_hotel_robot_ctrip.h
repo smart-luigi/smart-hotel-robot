@@ -27,6 +27,7 @@ protected:
 	virtual bool IsListUrl(const char* url) override;
 	virtual bool IsDataUrl(const char* url) override;
 	virtual const char* GetData() override;
+	virtual void SetData(const char* data) override;
 protected:
 	virtual void SetAuthorized() override;
 	virtual void SetUnauthorized() override;
@@ -34,7 +35,7 @@ protected:
 	virtual void AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 	virtual void AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 	virtual void QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
-	virtual void AddHotels(void* data, size_t data_size) override;
+	virtual void AddHotel(MessageRobotHotel* hotel) override;
 protected:
 	virtual void HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
 	virtual void HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;

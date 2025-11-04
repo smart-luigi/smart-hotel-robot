@@ -1,6 +1,7 @@
 #ifndef _SMART_HOTEL_MESSAGE_H_
 #define _SMART_HOTEL_MESSAGE_H_
 #pragma once
+#include <windows.h>
 
 #define	MESSAGE_TOPIC_SERVER					"smart-hotel-server"
 #define	MESSAGE_TOPIC_ROBOT						"smart-hotel-robot"
@@ -67,6 +68,20 @@ typedef struct tagMessageRobotStatus
 	MessageRobotHeader	header;
 	bool				authorized;
 } MessageRobotStatus, * MessageRobotStatusPtr;
+
+typedef struct tagMessageRobotHotel
+{
+	unsigned int	index;
+	char			image[MAX_PATH];
+	char			title[MAX_PATH];
+	char			score[32];
+	char			feedback[128];
+	char			star[32];
+	char			address[MAX_PATH];
+	char			price[8];
+	char			orig_price[8];
+	char			bought[32];
+} MessageRobotHotel, *MessageRobotHotelPtr;
 
 typedef struct tagMessageRobotHotels
 {

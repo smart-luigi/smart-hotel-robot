@@ -4,6 +4,7 @@
 
 #include <string>
 #include <atomic>
+#include <set>
 #include "smart_hotel_robot.h"
 #include "smart_hotel_robot_context.h"
 
@@ -27,6 +28,7 @@ protected:
 	virtual bool IsListUrl(const char* url) override;
 	virtual bool IsDataUrl(const char* url) override;
 	virtual const char* GetData() override;
+	virtual void SetData(const char* data) override;
 protected:
 	virtual void SetAuthorized() override;
 	virtual void SetUnauthorized() override;
@@ -34,7 +36,7 @@ protected:
 	virtual void AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 	virtual void AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
 	virtual void QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) override;
-	virtual void AddHotels(void* data, size_t data_size) override;
+	virtual void AddHotel(MessageRobotHotel* hotel) override;
 protected:
 	virtual void HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
 	virtual void HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) override;
@@ -51,18 +53,19 @@ protected:
 	virtual void DoAuthorizingCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url);
 	virtual void DoAuthorizCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url);
 protected:
-	SmartHotelRobotContext* _context;
-	std::string				_url_login;
-	std::string				_url_account;
-	std::string				_url_list;
-	std::string				_url_data;
-	std::atomic<bool>		_authorized;
-	HANDLE					_authorizing_code_start_event;
-	HANDLE					_authorizing_code_complete_event;
-	HANDLE					_authorize_code_start_event;
-	HANDLE					_authorize_code_complete_event;
-	std::string				_authorize_code;
-	std::string				_hotels_data;
+	SmartHotelRobotContext*			_context;
+	std::string						_url_login;
+	std::string						_url_account;
+	std::string						_url_list;
+	std::string						_url_data;
+	std::atomic<bool>				_authorized;
+	HANDLE							_authorizing_code_start_event;
+	HANDLE							_authorizing_code_complete_event;
+	HANDLE							_authorize_code_start_event;
+	HANDLE							_authorize_code_complete_event;
+	std::string						_authorize_code;
+	std::string						_hotels_data;
+	std::set<MessageRobotHotel*>	_hotels_set;
 };
 
 #endif // !_SMART_HOTEL_ROBOT_MEITUAN_H_

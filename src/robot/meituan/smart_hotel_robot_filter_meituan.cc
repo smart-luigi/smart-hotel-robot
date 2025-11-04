@@ -23,7 +23,6 @@ cef_response_filter_status_t SmartHotelRobotResponseFilterMeituan::Filter(void* 
     if (data_out_written > 0) 
     {
         std::memcpy(data_out, data_in, data_out_written);
-        _robot->AddHotels(data_in, data_out_written);
     }
 
     return RESPONSE_FILTER_DONE;

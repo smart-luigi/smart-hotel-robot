@@ -22,6 +22,7 @@ public:
 	virtual bool IsListUrl(const char* url) = 0;
 	virtual bool IsDataUrl(const char* url) = 0;
 	virtual const char* GetData() = 0;
+	virtual void SetData(const char* data) = 0;
 public:
 	virtual void SetAuthorized() = 0;
 	virtual void SetUnauthorized() = 0;
@@ -29,7 +30,7 @@ public:
 	virtual void AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
-	virtual void AddHotels(void* data, size_t data_size) = 0;
+	virtual void AddHotel(MessageRobotHotel* hotel) = 0;
 public:
 	virtual void HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;

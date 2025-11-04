@@ -81,7 +81,7 @@ protected:
 protected:
 	void CreateErrorResponse(int code, const char* message, httplib::Response& res);
 	void CreateSuccessResponse(httplib::Response& res);
-	void CreateSuccessResponse(const char* data, httplib::Response& res);
+	void CreateSuccessResponse(const char* data, bool array, httplib::Response& res);
 private:
 	static void WINAPI IpcMessageCallback(LPCSTR ipc_name,
 		LPCVOID ipc_context,

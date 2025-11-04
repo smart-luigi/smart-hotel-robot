@@ -2,6 +2,7 @@
 #include "smart_hotel_robot_context.h"
 #include "smart_hotel_robot_window_handler.h"
 #include "smart_hotel_robot_resource_handler.h"
+#include "smart_hotel_robot_message_handler.h"
 
 int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdline, int cmdshow)
 {
@@ -84,6 +85,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 		
 		app->SetWindowMessageHandler(new SmartHotelRobotWindowHandler(context));
 		app->SetBrowserResourceHandler(new SmartHotelRobotResourceHandler(context));
+		app->AddBrowserMessageHandler(new SmartHotelRobotMessageHandler(context));
 
 		SmartLogInfo("Smart Hotel Robot Started");
 

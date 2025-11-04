@@ -132,6 +132,12 @@ const char* SmartHotelRobotCtrip::GetData()
 	return _hotels_data.c_str();
 }
 
+void SmartHotelRobotCtrip::SetData(const char* data)
+{
+	_hotels_data.clear();
+	_hotels_data.append(data);
+}
+
 void SmartHotelRobotCtrip::SetAuthorized()
 {
 	_authorized = true;
@@ -162,7 +168,7 @@ void SmartHotelRobotCtrip::QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<
 
 }
 
-void SmartHotelRobotCtrip::AddHotels(void* data, size_t data_size)
+void SmartHotelRobotCtrip::AddHotel(MessageRobotHotel* hotel)
 {
 
 }
