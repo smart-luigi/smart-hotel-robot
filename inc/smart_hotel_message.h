@@ -74,13 +74,13 @@ typedef struct tagMessageRobotHotel
 	unsigned int	index;
 	char			image[MAX_PATH];
 	char			title[MAX_PATH];
-	char			score[32];
-	char			feedback[128];
-	char			star[32];
+	char			score[MAX_PATH];
+	char			feedback[MAX_PATH];
+	char			star[MAX_PATH];
 	char			address[MAX_PATH];
-	char			price[8];
-	char			orig_price[8];
-	char			bought[32];
+	char			price[MAX_PATH];
+	char			orig_price[MAX_PATH];
+	char			bought[MAX_PATH];
 } MessageRobotHotel, *MessageRobotHotelPtr;
 
 typedef struct tagMessageRobotHotels

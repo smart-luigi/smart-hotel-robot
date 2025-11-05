@@ -856,33 +856,22 @@ void SmartHotelServer::CreateSuccessResponse(httplib::Response& res)
 
 void SmartHotelServer::CreateSuccessResponse(const char* data, bool array, httplib::Response& res)
 {
-	char* data_utf8 = (char*)SmartMemAlloc(lstrlenA(data) * 3);
-	SmartStrA2U(data_utf8, data);
-
 	boost::property_tree::ptree response;
 	response.put<int>("code", ERROR_SUCCESS);
 	response.put<std::string>("message", "success");
 	if (array)
 	{
-		boost::property_tree::ptree json;
-		boost::property_tree::read_json(data, json);
-		response.push_back(std::make_pair("", json));
+		response.put<std::string>("data", data);
 	}
 	else
 	{
 		response.put<std::string>("data", data);
 	}
-
+	
 	std::ostringstream oss;
 	boost::property_tree::write_json(oss, response);
 
 	res.set_content(oss.str().c_str(), "application/json");
-
-	if (data_utf8)
-	{
-		SmartMemFree(data_utf8);
-		data_utf8 = nullptr;
-	}
 }
 
 void WINAPI SmartHotelServer::IpcMessageCallback(LPCSTR ipc_name,

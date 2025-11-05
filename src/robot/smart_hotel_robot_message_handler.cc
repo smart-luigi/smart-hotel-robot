@@ -24,7 +24,7 @@ bool SmartHotelRobotMessageHandler::OnQuery(CefRefPtr<CefBrowser> browser,
 
     do
     {
-        output = gumbo_parse(request.ToString().c_str());
+        output = gumbo_parse_with_options(&kGumboDefaultOptions, request.ToString().c_str(), request.length());
         if (output == nullptr)
             break;
 
@@ -222,7 +222,14 @@ const char* SmartHotelRobotMessageHandler::GetHotelTitle(GumboNode* node)
         if (child->v.element.tag != GUMBO_TAG_H1)
             continue;
 
-        return child->v.text.text;
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if(text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -247,10 +254,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelScore(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-score") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-score"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -275,10 +289,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelFeedback(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-feedback") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-feedback"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -303,10 +324,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelStar(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-star") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-star"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -331,10 +359,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelAddress(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-address") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-address"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -359,18 +394,25 @@ const char* SmartHotelRobotMessageHandler::GetHotelPrice(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-price") == 0)
-        {
-            GumboVector* prices = &child->v.element.children;
-            if (prices == nullptr)
-                continue;
+        if (lstrcmpiA(class_attribute->value, "poi-price"))
+            continue;
 
-            GumboNode* price = static_cast<GumboNode*>(prices->data[0]);
-            if (price->v.element.tag != GUMBO_TAG_EM)
-            {
-                return price->v.text.text;
-            }
-        }
+        GumboVector* prices = &child->v.element.children;
+        if (prices == nullptr)
+            continue;
+
+        GumboNode* price = static_cast<GumboNode*>(prices->data[0]);
+        if (price->v.element.tag != GUMBO_TAG_EM)
+            continue;
+        
+        if (price->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(price->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -395,10 +437,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelOrigPrice(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-origin") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-origin"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;
@@ -423,10 +472,17 @@ const char* SmartHotelRobotMessageHandler::GetHotelBought(GumboNode* node)
         if (class_attribute == nullptr)
             continue;
 
-        if (lstrcmpiA(class_attribute->value, "poi-bought") == 0)
-        {
-            return child->v.text.text;
-        }
+        if (lstrcmpiA(class_attribute->value, "poi-bought"))
+            continue;
+
+        if (child->v.element.children.length == 0)
+            continue;
+
+        GumboNode* text = static_cast<GumboNode*>(child->v.element.children.data[0]);
+        if (text->type != GUMBO_NODE_TEXT)
+            continue;
+
+        return text->v.text.text;
     }
 
     return nullptr;

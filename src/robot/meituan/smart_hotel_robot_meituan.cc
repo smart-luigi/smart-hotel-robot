@@ -164,7 +164,7 @@ const char* SmartHotelRobotMeituan::GetData()
 	}
 
 	boost::property_tree::ptree doc;
-	doc.add_child("data", items);
+	doc.add_child("hotels", items);
 
 	std::ostringstream oss;
 	boost::property_tree::write_json(oss, doc);
