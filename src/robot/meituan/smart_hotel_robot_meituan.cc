@@ -281,11 +281,6 @@ void SmartHotelRobotMeituan::AddHotel(MessageRobotHotel* hotel)
 
 void SmartHotelRobotMeituan::HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
 {
-
-}
-
-void SmartHotelRobotMeituan::HandleAuthorizeCodeStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
 	SetEvent(_authorizing_code_start_event);
 }
 
@@ -352,11 +347,6 @@ void SmartHotelRobotMeituan::WaitAuthorizCodeComplete()
 {
 	WaitForSingleObject(_authorize_code_complete_event, INFINITE);
 	ResetEvent(_authorize_code_complete_event);
-}
-
-void SmartHotelRobotMeituan::HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
-	SetEvent(_authorizing_code_start_event);
 }
 
 void SmartHotelRobotMeituan::DoAuthorizingCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)

@@ -178,11 +178,6 @@ void SmartHotelRobotCtrip::HandleAuthorizeAccount(const void* message_buffer, un
 
 }
 
-void SmartHotelRobotCtrip::HandleAuthorizeCodeStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
-
-}
-
 void SmartHotelRobotCtrip::HandleAuthorizeCode(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
 {
 	
@@ -229,11 +224,6 @@ void SmartHotelRobotCtrip::WaitAuthorizSmsComplete()
 {
 	WaitForSingleObject(_authorize_sms_complete_event, INFINITE);
 	ResetEvent(_authorize_sms_complete_event);
-}
-
-void SmartHotelRobotCtrip::HandleAuthorizeAccountStart(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
-{
-	SetEvent(_authorizing_start_event);
 }
 
 void SmartHotelRobotCtrip::DoAuthorizing(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
