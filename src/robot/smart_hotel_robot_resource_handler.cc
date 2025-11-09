@@ -31,6 +31,9 @@ cef_return_value_t SmartHotelRobotResourceHandler::OnBeforeResourceLoad(CefRefPt
 	CefRefPtr<CefRequest> request,
 	CefRefPtr<CefCallback> callback) 
 {
+	CefString* url = new CefString(request->GetURL());
+	SmartLogInfo("url = %s", url->ToString().c_str());
+
 	return RV_CONTINUE_ASYNC;
 }
 
@@ -64,7 +67,7 @@ void SmartHotelRobotResourceHandler::OnResourceLoadComplete(CefRefPtr<CefBrowser
 		if (_robot->IsLoginUrl(url->ToString().c_str()))
 		{
 			_robot->SetUnauthorized();
-			_robot->AuthorizeCode(browser, frame, *url);
+			_robot->AuthorizeAccountPassword(browser, frame, *url);
 			break;
 		}
 

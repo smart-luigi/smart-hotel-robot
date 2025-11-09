@@ -19,8 +19,6 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 			result = ERROR_LOG_STATE_INVALID;
 			break;
 		}
-
-		SmartLogInfo("Smart Hotel Robot Startup....");
 		
 		int app_type = CefClientApplicationManager::GetClientAppType();
 		if (app_type == CEF_APP_TYPE_BROWSER)
@@ -86,8 +84,6 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmdlin
 		app->SetWindowMessageHandler(new SmartHotelRobotWindowHandler(context));
 		app->SetBrowserResourceHandler(new SmartHotelRobotResourceHandler(context));
 		app->AddBrowserMessageHandler(new SmartHotelRobotMessageHandler(context));
-
-		SmartLogInfo("Smart Hotel Robot Started");
 
 		result = app->Execute();
 

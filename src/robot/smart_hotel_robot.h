@@ -27,11 +27,12 @@ public:
 	virtual void SetAuthorized() = 0;
 	virtual void SetUnauthorized() = 0;
 	virtual bool IsAuthorized() = 0;
-	virtual void AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
-	virtual void AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
+	virtual void AuthorizeAccountPassword(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
+	virtual void AuthorizeAccountCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void QueryHotels(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url) = 0;
 	virtual void AddHotel(MessageRobotHotel* hotel) = 0;
 public:
+	virtual void HandleAuthorizeAccountPassword(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void HandleAuthorizeCode(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;
 	virtual void HandleQueryAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length) = 0;

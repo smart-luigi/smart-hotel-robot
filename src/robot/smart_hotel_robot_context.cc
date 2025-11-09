@@ -379,6 +379,9 @@ int SmartHotelRobotContext::HandleMessage(LPCSTR ipc_name,
 			PostMessage(_application->GetRootWindowHandle(), WM_DESTROY, 0, 0);
 		}
 		break;
+	case MESSAGE_ROBOT_AUTHORIZE_ACCOUNT_PASSWORD:
+		_hotel_robot->HandleAuthorizeAccountPassword(message_buffer, message_length, answer_buffer, answer_length);
+		break;
 	case MESSAGE_ROBOT_AUTHORIZE_ACCOUNT:
 		_hotel_robot->HandleAuthorizeAccount(message_buffer, message_length, answer_buffer, answer_length);
 		break;

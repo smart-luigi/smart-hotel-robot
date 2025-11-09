@@ -3,23 +3,25 @@
 #pragma once
 #include <windows.h>
 
-#define	MESSAGE_TOPIC_SERVER					"smart-hotel-server"
-#define	MESSAGE_TOPIC_ROBOT						"smart-hotel-robot"
-#define	MESSAGE_SIZE							1024 * 1024 * 2
+#define	MESSAGE_TOPIC_SERVER						"smart-hotel-server"
+#define	MESSAGE_TOPIC_ROBOT							"smart-hotel-robot"
+#define	MESSAGE_SIZE								1024 * 1024
 
-#define MESSAGE_ROBOT_START						0x101
-#define MESSAGE_ROBOT_STARTED					0x102
-#define MESSAGE_ROBOT_STOP						0x201
-#define MESSAGE_ROBOT_STOPPED					0x202
-#define MESSAGE_ROBOT_AUTHORIZE_ACCOUNT			0x301
-#define MESSAGE_ROBOT_AUTHORIZE_CODE			0x302
-#define MESSAGE_ROBOT_QUERY_ACCOUNT				0x401
-#define MESSAGE_ROBOT_QUERY_STATUS				0x402
-#define MESSAGE_ROBOT_QUERY_HOTELS				0x403
+#define MESSAGE_ROBOT_START							0x101
+#define MESSAGE_ROBOT_STARTED						0x102
+#define MESSAGE_ROBOT_STOP							0x201
+#define MESSAGE_ROBOT_STOPPED						0x202
+#define MESSAGE_ROBOT_AUTHORIZE_ACCOUNT_PASSWORD	0x302
+#define MESSAGE_ROBOT_AUTHORIZE_ACCOUNT				0x303
+#define MESSAGE_ROBOT_AUTHORIZE_CODE				0x304
+#define MESSAGE_ROBOT_AUTHORIZED					0x305
+#define MESSAGE_ROBOT_QUERY_ACCOUNT					0x401
+#define MESSAGE_ROBOT_QUERY_STATUS					0x402
+#define MESSAGE_ROBOT_QUERY_HOTELS					0x403
 
-#define WM_EXIT									WM_USER + 100
-#define WM_LOAD_URL								WM_USER + 200
-#define WM_SIMULATE_START						WM_USER + 300
+#define WM_EXIT										WM_USER + 100
+#define WM_LOAD_URL									WM_USER + 200
+#define WM_SIMULATE_START							WM_USER + 300
 
 enum SmartHotelRobotType
 {
@@ -51,8 +53,13 @@ typedef struct tagMessageRobotHeader
 typedef struct tagMessageRobotAuthorizeAccount
 {
 	MessageRobotHeader	header;
-	char				password[32];
 } MessageRobotAuthorizeAccount, *MessageRobotAuthorizeAccountPtr;
+
+typedef struct tagMessageRobotAuthorizePassword
+{
+	MessageRobotHeader	header;
+	char				password[32];
+} MessageRobotAuthorizePassword, *MessageRobotAuthorizePasswordPtr;
 
 typedef struct tagMessageRobotAuthorizeCode
 {

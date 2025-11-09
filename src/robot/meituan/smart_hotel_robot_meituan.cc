@@ -9,16 +9,29 @@ SmartHotelRobotMeituan::SmartHotelRobotMeituan(SmartHotelRobotContext* context)
 	, _url_list("https://i.meituan.com/awp/h5/hotel/list/list.html")
 	, _url_data("https://ihotel.meituan.com/hbsearch/HotelSearch")
 	, _authorized(false)
-	, _authorizing_code_start_event(nullptr)
-	, _authorizing_code_complete_event(nullptr)
+	, _authorize_account_start_event(nullptr)
+	, _authorize_account_complete_event(nullptr)
 	, _authorize_code_start_event(nullptr)
 	, _authorize_code_complete_event(nullptr)
+	, _authorize_password_start_event(nullptr)
 {
 
 }
 
 SmartHotelRobotMeituan::~SmartHotelRobotMeituan()
 {
+	if (_authorize_password_complete_event)
+	{
+		CloseHandle(_authorize_password_complete_event);
+		_authorize_password_complete_event = nullptr;
+	}
+
+	if (_authorize_password_start_event)
+	{
+		CloseHandle(_authorize_password_start_event);
+		_authorize_password_start_event = nullptr;
+	}
+
 	if (_authorize_code_complete_event)
 	{
 		CloseHandle(_authorize_code_complete_event);
@@ -31,16 +44,16 @@ SmartHotelRobotMeituan::~SmartHotelRobotMeituan()
 		_authorize_code_start_event = nullptr;
 	}
 
-	if (_authorizing_code_complete_event)
+	if (_authorize_account_complete_event)
 	{
-		CloseHandle(_authorizing_code_complete_event);
-		_authorizing_code_complete_event = nullptr;
+		CloseHandle(_authorize_account_complete_event);
+		_authorize_account_complete_event = nullptr;
 	}
 
-	if (_authorizing_code_start_event)
+	if (_authorize_account_start_event)
 	{
-		CloseHandle(_authorizing_code_start_event);
-		_authorizing_code_start_event = nullptr;
+		CloseHandle(_authorize_account_start_event);
+		_authorize_account_start_event = nullptr;
 	}
 
 	for (auto it = _hotels_set.begin(); it != _hotels_set.end(); it++)
@@ -62,15 +75,15 @@ int SmartHotelRobotMeituan::Init()
 
 	do
 	{
-		_authorizing_code_start_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authorizing_code_start_event == nullptr)
+		_authorize_account_start_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_account_start_event == nullptr)
 		{
 			result = GetLastError();
 			break;
 		}
 
-		_authorizing_code_complete_event = CreateEvent(nullptr, true, false, nullptr);
-		if (_authorizing_code_complete_event == nullptr)
+		_authorize_account_complete_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_account_complete_event == nullptr)
 		{
 			result = GetLastError();
 			break;
@@ -85,6 +98,20 @@ int SmartHotelRobotMeituan::Init()
 
 		_authorize_code_complete_event = CreateEvent(nullptr, true, false, nullptr);
 		if (_authorize_code_complete_event == nullptr)
+		{
+			result = GetLastError();
+			break;
+		}
+
+		_authorize_password_start_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_password_start_event == nullptr)
+		{
+			result = GetLastError();
+			break;
+		}
+
+		_authorize_password_complete_event = CreateEvent(nullptr, true, false, nullptr);
+		if (_authorize_password_complete_event == nullptr)
 		{
 			result = GetLastError();
 			break;
@@ -196,29 +223,36 @@ bool SmartHotelRobotMeituan::IsAuthorized()
 	return _authorized;
 }
 
-void SmartHotelRobotMeituan::AuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::AuthorizeAccountPassword(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotMeituan* robot) {
 
+		robot->RedirectAccountLogin(browser, frame, url);
+
+		robot->WaitAuthorizeAccountPasswordStart();
+
+		robot->DoAuthorizAccountPassword(browser, frame, url);
+
+		robot->WaitAuthorizeAccountPasswordComplete();
 
 	}, browser, frame, url, this).detach();
 }
 
-void SmartHotelRobotMeituan::AuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::AuthorizeAccountCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 	std::thread([](CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url, SmartHotelRobotMeituan* robot) {
 
-		robot->WaitAuthorizingCodeStart();
+		robot->WaitAuthorizeAccountStart();
 
-		robot->DoAuthorizingCode(browser, frame, url);
+		robot->DoAuthorizeAccount(browser, frame, url);
 
-		robot->WaitAuthorizingCodeComplete();
+		robot->WaitAuthorizeAccountComplete();
 
-		robot->WaitAuthorizCodeStart();
+		robot->WaitAuthorizeCodeStart();
 
-		robot->DoAuthorizCode(browser, frame, url);
+		robot->DoAuthorizeCode(browser, frame, url);
 
-		robot->WaitAuthorizCodeComplete();
+		robot->WaitAuthorizeCodeComplete();
 
 	}, browser, frame, url, this).detach();
 }
@@ -279,9 +313,21 @@ void SmartHotelRobotMeituan::AddHotel(MessageRobotHotel* hotel)
 	}
 }
 
+void SmartHotelRobotMeituan::HandleAuthorizeAccountPassword(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
+{
+	MessageRobotAuthorizePasswordPtr message = (MessageRobotAuthorizePasswordPtr)message_buffer;
+	if (message == nullptr)
+		return;
+
+	_authorize_password.clear();
+	_authorize_password.append(message->password);
+
+	SetEvent(_authorize_password_start_event);
+}
+
 void SmartHotelRobotMeituan::HandleAuthorizeAccount(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
 {
-	SetEvent(_authorizing_code_start_event);
+	SetEvent(_authorize_account_start_event);
 }
 
 void SmartHotelRobotMeituan::HandleAuthorizeCode(const void* message_buffer, unsigned int message_length, void* answer_buffer, unsigned int answer_length)
@@ -325,31 +371,96 @@ void SmartHotelRobotMeituan::HandleQueryHotels(const void* message_buffer, unsig
 	}
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizingCodeStart()
+void SmartHotelRobotMeituan::RedirectAccountLogin(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	WaitForSingleObject(_authorizing_code_start_event, INFINITE);
-	ResetEvent(_authorizing_code_start_event);
+	std::string id = _context->GetCacheEnviromentId();
+	std::string code_redirect_login = R"(
+		var toAccountLogin = document.getElementById("toAccountLogin");
+		if(toAccountLogin) {
+			toAccountLogin.click();
+		}
+	)";
+
+	Sleep(1000);
+
+	frame->ExecuteJavaScript(code_redirect_login, url, 0);
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizingCodeComplete()
+void SmartHotelRobotMeituan::DoAuthorizAccountPassword(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
-	WaitForSingleObject(_authorizing_code_complete_event, INFINITE);
-	ResetEvent(_authorizing_code_complete_event);
+	std::string id = _context->GetCacheEnviromentId();
+	std::string code_authorize_account_password = R"(
+		var pwInputChecked = document.getElementById("pwInputChecked");
+		if(pwInputChecked) {
+			pwInputChecked.click();
+		}
+
+		var accountInput = document.getElementById("accountInput");
+		if(accountInput) {
+			accountInput.focus();
+			accountInput.value = "XXXXXXXXXXX";
+		}
+
+		var accountPwInput = document.getElementById("accountPwInput");
+		if(accountPwInput) {
+			accountPwInput.focus();
+			accountPwInput.value = "YYYYYYYYYYY";
+		}
+		
+		setTimeout(function(){
+			var accountLogin = document.getElementById("accountLogin");
+			if(accountLogin) {
+				accountInput.focus();
+				accountLogin.click();
+			}
+		}, 1000);
+	)";
+
+	boost::replace_all(code_authorize_account_password, "XXXXXXXXXXX", id);
+	boost::replace_all(code_authorize_account_password, "YYYYYYYYYYY", _authorize_password);
+
+	frame->ExecuteJavaScript(code_authorize_account_password, url, 0);
+
+	SetEvent(_authorize_password_complete_event);
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizCodeStart()
+void SmartHotelRobotMeituan::WaitAuthorizeAccountPasswordStart()
+{
+	WaitForSingleObject(_authorize_password_start_event, INFINITE);
+	ResetEvent(_authorize_password_start_event);
+}
+
+void SmartHotelRobotMeituan::WaitAuthorizeAccountPasswordComplete()
+{
+	WaitForSingleObject(_authorize_password_complete_event, INFINITE);
+	ResetEvent(_authorize_password_complete_event);
+}
+
+void SmartHotelRobotMeituan::WaitAuthorizeAccountStart()
+{
+	WaitForSingleObject(_authorize_account_start_event, INFINITE);
+	ResetEvent(_authorize_account_start_event);
+}
+
+void SmartHotelRobotMeituan::WaitAuthorizeAccountComplete()
+{
+	WaitForSingleObject(_authorize_account_complete_event, INFINITE);
+	ResetEvent(_authorize_account_complete_event);
+}
+
+void SmartHotelRobotMeituan::WaitAuthorizeCodeStart()
 {
 	WaitForSingleObject(_authorize_code_start_event, INFINITE);
 	ResetEvent(_authorize_code_start_event);
 }
 
-void SmartHotelRobotMeituan::WaitAuthorizCodeComplete()
+void SmartHotelRobotMeituan::WaitAuthorizeCodeComplete()
 {
 	WaitForSingleObject(_authorize_code_complete_event, INFINITE);
 	ResetEvent(_authorize_code_complete_event);
 }
 
-void SmartHotelRobotMeituan::DoAuthorizingCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::DoAuthorizeAccount(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 	std::string id = _context->GetCacheEnviromentId();
 	std::string code_authorizing = R"(
@@ -384,10 +495,10 @@ void SmartHotelRobotMeituan::DoAuthorizingCode(CefRefPtr<CefBrowser> browser, Ce
 
 	frame->ExecuteJavaScript(code_authorizing, url, 0);
 
-	SetEvent(_authorizing_code_complete_event);
+	SetEvent(_authorize_account_complete_event);
 }
 
-void SmartHotelRobotMeituan::DoAuthorizCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
+void SmartHotelRobotMeituan::DoAuthorizeCode(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& url)
 {
 	std::string code_authoriz_code = R"(
 		var codeInput = document.getElementById("codeInput");
